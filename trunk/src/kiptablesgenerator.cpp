@@ -397,7 +397,7 @@ void kiptablesgenerator::setupIPortsPage()
   KPushButton *newService = new KPushButton(i18n("A&dd Service"), iPortsPage);
   newService->show();
   layout->addWidget(newService, 1, 1);
-  connect(newService, SIGNAL(clicked()), newServiceDialog, SLOT(show()));
+  connect(newService, SIGNAL(clicked()), this, SLOT(slotShowServiceDialog()));
   
   KPushButton *delService = new KPushButton(i18n("&Remove Service"), iPortsPage);
   delService->show();
@@ -534,6 +534,19 @@ void kiptablesgenerator::setupNewForwardDialog()
   newForwardDialog->setMainWidget(dialogArea);
 }
 
+void kiptablesgenerator::slotShowServiceDialog()
+{
+  // Reset dialog
+  ((KComboBox *) namedWidgets["newService_protocols"])->setCurrentItem(0);
+  slotChangedProtocol(0);
+  ((QRadioButton*) namedWidgets["newService_named"])->setChecked(true);
+  ((KComboBox *) namedWidgets["newService_names"])->setCurrentItem(0);
+  ((KLineEdit*) namedWidgets["newService_port"])->setText("");
+  ((QRadioButton*) namedWidgets["newService_allow"])->setChecked(true);
+
+  newServiceDialog->show();
+}
+
 void kiptablesgenerator::setupNewServiceDialog()
 {
   newServiceDialog = new KDialogBase(this, 0, true, i18n("Add Service"), KDialogBase::Ok | KDialogBase::Cancel);
@@ -612,6 +625,7 @@ void kiptablesgenerator::setupNewServiceDialog()
   optAllow->show();
   optAllowDeny->insert(optAllow);
   layout->addWidget(optAllow, 6, 0);
+  namedWidgets["newService_allow"] = optAllow;
   
   QRadioButton *optDeny = new QRadioButton(i18n("&Drop"), dialogArea);
   optDeny->setName(i18n("Drop"));

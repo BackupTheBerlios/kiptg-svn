@@ -80,6 +80,7 @@ public:
 protected slots:
   void slotNewInterface();
   void slotChangedProtocol(int);
+  void slotShowServiceDialog();
   void slotAddService();
   void slotDelService();
   void slotAddForward();
