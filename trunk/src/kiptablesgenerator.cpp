@@ -622,6 +622,8 @@ void kiptablesgenerator::accept()
     }
     if (((QCheckBox *) namedWidgets["iCheckSyn"])->isChecked())
       rulesList += "$IPTABLES -A INPUT -p tcp -m tcp ! --syn -m conntrack --ctstate NEW -j DROP\n";
+    if (((QCheckBox *) namedWidgets["iCheckSynFin"])->isChecked())
+      rulesList += "$IPTABLES -A INPUT -p tcp -m tcp --tcp-flags SYN,FIN SYN,FIN -j DROP\n";
          
     if ( ((QCheckBox*) namedWidgets["iConntrackAllSame"])->isChecked() )
     {
