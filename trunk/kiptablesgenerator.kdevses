@@ -1,13 +1,16 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!DOCTYPE KDevPrjSession>
 <KDevPrjSession>
- <DocsAndViews NumberOfDocuments="2" >
+ <DocsAndViews NumberOfDocuments="3" >
   <Doc0 NumberOfViews="1" URL="file:/home/fred/kiptablesgenerator/src/kiptablesgenerator.cpp" >
-   <View0 line="541" Type="Source" />
+   <View0 line="625" Type="Source" />
   </Doc0>
   <Doc1 NumberOfViews="1" URL="file:/home/fred/kiptablesgenerator/src/kiptablesgenerator.h" >
    <View0 line="0" Type="Source" />
   </Doc1>
+  <Doc2 NumberOfViews="1" URL="file:/usr/src/kde/qt-copy/doc/html/qcheckbox.html" >
+   <View0 Type="Documentation" />
+  </Doc2>
  </DocsAndViews>
  <pluginList>
   <kdevbookmarks>

@@ -711,9 +711,11 @@ void kiptablesgenerator::slotChangedProtocol(int newProtocol)
     names->insertItem("IMAP");
     names->insertItem("IMAPS");
     ((QRadioButton *) namedWidgets["newService_numbered"])->setEnabled(true);
+    ((QLineEdit *) namedWidgets["newService_ports"])->setEnabled(true);
     return;
   }
   ((QRadioButton *) namedWidgets["newService_numbered"])->setEnabled(false);
+  ((QLineEdit *) namedWidgets["newService_ports"])->setEnabled(false);
   ((QRadioButton *) namedWidgets["newService_named"])->setChecked(true);
   names->insertItem("any");
   names->insertItem("echo-reply");
