@@ -81,6 +81,7 @@ protected slots:
   void slotNewInterface();
   void slotChangedProtocol(int);
   void slotShowServiceDialog();
+  void slotServiceNamedChanged(bool);
   void slotAddService();
   void slotDelService();
   void slotUpService();

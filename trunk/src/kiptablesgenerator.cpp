@@ -541,8 +541,9 @@ void kiptablesgenerator::slotShowServiceDialog()
   slotChangedProtocol(0);
   ((QRadioButton*) namedWidgets["newService_named"])->setChecked(true);
   ((KComboBox *) namedWidgets["newService_names"])->setCurrentItem(0);
-  ((KLineEdit*) namedWidgets["newService_port"])->setText("");
+  ((KLineEdit*) namedWidgets["newService_ports"])->setText("");
   ((QRadioButton*) namedWidgets["newService_allow"])->setChecked(true);
+  slotServiceNamedChanged(true);
 
   newServiceDialog->show();
 }
@@ -593,6 +594,7 @@ void kiptablesgenerator::setupNewServiceDialog()
   optNamed->show();
   layout->addWidget(optNamed, 3, 0);
   namedWidgets["newService_named"] = optNamed;
+  connect(optNamed, SIGNAL(toggled(bool )), this, SLOT(slotServiceNamedChanged(bool )));
   
   KComboBox *names = new KComboBox(dialogArea);
   names->show();
@@ -693,6 +695,12 @@ void kiptablesgenerator::slotAddForward()
     localPort,
     destination);
     item = 0; // stop unused variable warnings
+}
+
+void kiptablesgenerator::slotServiceNamedChanged(bool named)
+{
+  namedWidgets["newService_names"]->setEnabled(named);
+  namedWidgets["newService_ports"]->setEnabled(!named);
 }
 
 void kiptablesgenerator::slotAddService()
