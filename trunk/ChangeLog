@@ -3,6 +3,7 @@ Fred Emmott, 20040101
 	- Spacing fixes
 	- Enable/disable controls on new service dialog, based on by name/number
 		selected.
+	- Implemented distro-specifics
 
 Fred Emmott, 20041229
 	- Fixed automoc problems

@@ -1,2 +1,1 @@
-- Add distribution specific stuff; location of firewall script, how to run it (eg use /sbin/runscript on gentoo
-	- some distros expect a stop() function. This will be implemented
+Please see bug trackers and feature requests on http://developer.berlios.de/projects/kiptg/
