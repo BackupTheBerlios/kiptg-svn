@@ -1,3 +1,6 @@
+Fred Emmott, 20040101
+	- Dialogs reset before showing
+
 Fred Emmott, 20041229
 	- Fixed automoc problems
 	- Finished port forwarding
