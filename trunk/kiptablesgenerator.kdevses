@@ -3,17 +3,17 @@
 <KDevPrjSession>
  <DocsAndViews NumberOfDocuments="2" >
   <Doc0 NumberOfViews="1" URL="file:/home/fred/source/kiptablesgenerator/src/kiptablesgenerator.h" >
-   <View0 line="0" Type="Source" />
+   <View0 line="90" Type="Source" />
   </Doc0>
   <Doc1 NumberOfViews="1" URL="file:/home/fred/source/kiptablesgenerator/src/kiptablesgenerator.cpp" >
-   <View0 line="112" Type="Source" />
+   <View0 line="708" Type="Source" />
   </Doc1>
  </DocsAndViews>
  <pluginList>
   <kdevbookmarks>
    <bookmarks>
     <bookmark url="/home/fred/source/kiptablesgenerator/src/kiptablesgenerator.cpp" >
-     <mark line="856" />
+     <mark line="901" />
     </bookmark>
    </bookmarks>
   </kdevbookmarks>

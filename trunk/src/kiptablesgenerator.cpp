@@ -598,7 +598,6 @@ void kiptablesgenerator::setupNewServiceDialog()
   
   QButtonGroup *optNamedOrNumbered = new QButtonGroup(dialogArea);
   optNamedOrNumbered->hide();
-  namedWidgets["newService_namedOrNumbered"] = optNamedOrNumbered;
   
   QRadioButton *optNamed = new QRadioButton(i18n("&Name: "), dialogArea);
   optNamed->setChecked(true);
@@ -628,7 +627,6 @@ void kiptablesgenerator::setupNewServiceDialog()
   
   QButtonGroup *optAllowDeny = new QButtonGroup(dialogArea);
   optAllowDeny->hide();
-  namedWidgets["newService_allowDeny"] = optAllowDeny;
   
   KSeparator *separator = new KSeparator(dialogArea);
   separator->show();
@@ -720,12 +718,15 @@ void kiptablesgenerator::slotAddService()
 {
   KListView *ports = (KListView*) namedWidgets["iPorts"];
   QString protoName = ((KComboBox*) namedWidgets["newService_protocols"])->currentText();
-  QString action = ((QButtonGroup*) namedWidgets["newService_allowDeny"])->selected()->name();
   QString portName, portNumber;
+  QString action;
+  ((QRadioButton*) namedWidgets["newService_allow"])->isChecked()
+    ? action = i18n("Allow")
+    : action = i18n("Deny");
   
   if (protoName != i18n("ICMP"))
   {
-    if (((QButtonGroup*) namedWidgets["newService_namedOrNumbered"])->selected()->name() == (QString) "named")
+    if (((QRadioButton*) namedWidgets["newService_named"])->isChecked())
     {
       portName = ((KComboBox*) namedWidgets["newService_names"])->currentText();
       struct servent *service;
