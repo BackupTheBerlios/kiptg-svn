@@ -492,7 +492,7 @@ void kiptablesgenerator::setupIDefensiveChecksPage()
   summary->show();
   layout->addWidget(summary);
   
-  QCheckBox *localSpoof = new QCheckBox(i18n("&Block spoofed local packages"), iDefensiveChecksPage);
+  QCheckBox *localSpoof = new QCheckBox(i18n("&Block spoofed local packets"), iDefensiveChecksPage);
   localSpoof->setChecked(true);
   localSpoof->show();
   layout->addWidget(localSpoof);
@@ -663,6 +663,9 @@ void kiptablesgenerator::accept()
         rulesList += QString("$IPTABLES -A INPUT -p icmp -m icmp --icmp-type %1 -j %2\n").arg(portName).arg(action);
        service = service->nextSibling();
     }
+    
+    if (((QCheckBox *) namedWidgets["iCheckLocalSpoof"])->isChecked())
+      rulesList += "$IPTABLES -A INPUT ! -i lo -d 127.0.0.0/8 -j DROP\n";
   }
  
   this->hide();
