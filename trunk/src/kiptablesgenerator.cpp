@@ -51,26 +51,55 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
   setupIPolicyPage();
   setupIConntrackPage();
   setupIPortsPage();
+  setupFForwardingPage();
   setupIDefensiveChecksPage();
   setupFinishedPage();
   helpButton()->hide();
 }
 
+void kiptablesgenerator::setupFForwardingPage()
+{
+  fForwardingPage = new QFrame(this);
+  
+  QGridLayout *layout = new QGridLayout(fForwardingPage, 4, 2);
+  QLabel *label = new QLabel(i18n(
+    "<p>If you wish to enable TCP forwardind for any ports (incoming or outgoing) add them to this page.</p>"),
+    fForwardingPage);
+  label->show();
+  layout->addMultiCellWidget(label, 0, 0, 0, 1);
+  
+  KListView *ports = new KListView(fForwardingPage);
+  ports->addColumn(i18n("In/Out"));
+  ports->addColumn(i18n("Port"));
+  ports->addColumn(i18n("Destination"));
+  ports->show();
+  namedWidgets["forwardsList"] = ports;
+  layout->addMultiCellWidget(ports, 1, 3, 0, 0);
+  
+  KPushButton *addForward = new KPushButton(fForwardingPage, i18n("Add..."));
+  layout->addWidget(addForward, 1, 1);
+  
+  KPushButton *delForward = new KPushButton(fForwardingPage, i18n("Remove"));
+  layout->addWidget(delForward, 1, 2);
+  
+  this->addPage(fForwardingPage, i18n("Port Forwarding"));
+}
+
 void kiptablesgenerator::setupWelcomePage()
 {
   welcomePage = new QFrame(this);
-  
+
   QVBoxLayout *layout = new QVBoxLayout(welcomePage);
 
   QLabel *label = new QLabel(i18n(
     "<p>Welcome to KIptablesGenerator.</p>"
     "<p>This wizard will help you create your firewall rules.</p>"
-		"<p><i>Troubleshooting:</i> The generated script requires "
-		"iptables installed, and the netfilter conntrack, TCP, UDP, "
-		"and ICMP kernel modules loaded.</p>"), welcomePage);
+    "<p><i>Troubleshooting:</i> The generated script requires "
+    "iptables installed, and the netfilter conntrack, TCP, UDP, "
+    "and ICMP kernel modules loaded.</p>"), welcomePage);
   label->show();  
   layout->addWidget(label);
-  
+
   welcomePage->show();
   this->addPage(welcomePage, i18n("Welcome"));
 }

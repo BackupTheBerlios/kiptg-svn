@@ -13,17 +13,13 @@
       <keyword>KDE</keyword>
     </keywords>
     <ignoreparts>
-      <part>KDevCTags</part>
-      <part>CvsService</part>
       <part>KDevClearCase</part>
-      <part>KDevcopyto</part>
       <part>KDevFileGroups</part>
       <part>KDevPerforce</part>
-      <part>KDevsubversion</part>
     </ignoreparts>
     <projectdirectory>.</projectdirectory>
     <absoluteprojectpath>false</absoluteprojectpath>
-    <description/>
+    <description></description>
     <secondaryLanguages/>
   </general>
   <kdevautoproject>
@@ -125,11 +121,11 @@
   <kdevdebugger>
     <general>
       <dbgshell>libtool</dbgshell>
-      <programargs/>
-      <gdbpath/>
-      <configGdbScript/>
-      <runShellScript/>
-      <runGdbScript/>
+      <programargs></programargs>
+      <gdbpath></gdbpath>
+      <configGdbScript></configGdbScript>
+      <runShellScript></runShellScript>
+      <runGdbScript></runGdbScript>
       <breakonloadinglibs>true</breakonloadinglibs>
       <separatetty>false</separatetty>
       <floatingtoolbar>false</floatingtoolbar>

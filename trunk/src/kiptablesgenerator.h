@@ -41,9 +41,9 @@ private:
   QStringList mRules;
   QMap<QString, QWidget*> namedWidgets;
   QMap<QString, unsigned int> namesToPorts;
-  
+
   KDialogBase *newServiceDialog;
-  
+
   QFrame *welcomePage;
   QFrame *interfacesPage;
   QFrame *incomingPage;
@@ -51,12 +51,13 @@ private:
   QFrame *iConntrackPage;
   QFrame *iPortsPage;
   QFrame *iDefensiveChecksPage;
+  QFrame *fForwardingPage;
   QFrame *finishedPage;
-  
+
   RulesDialog* rulesDialog;
-  
+
   void setupNewServiceDialog();
-  
+
   void setupWelcomePage();
   void setupInterfacesPage();
   void setupIncomingPage();
@@ -64,6 +65,7 @@ private:
   void setupIConntrackPage();
   void setupIPortsPage();
   void setupIDefensiveChecksPage();
+  void setupFForwardingPage();
   void setupFinishedPage();
 public:
   kiptablesgenerator(QWidget *parent = 0, const char *name = 0);
