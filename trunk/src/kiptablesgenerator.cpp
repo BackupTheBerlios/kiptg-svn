@@ -113,7 +113,7 @@ void kiptablesgenerator::setupFForwardingPage()
   
   KPushButton *addForward = new KPushButton(i18n("Add..."), fForwardingPage);
   layout->addWidget(addForward, 1, 1);
-  connect( addForward, SIGNAL(clicked()), newForwardDialog, SLOT(show()));
+  connect( addForward, SIGNAL(clicked()), this, SLOT(slotShowForwardDialog()));
   
   KPushButton *delForward = new KPushButton(i18n("Remove"), fForwardingPage);
   layout->addWidget(delForward, 2, 1);
@@ -657,6 +657,15 @@ void kiptablesgenerator::slotAddHost()
     ipOrMAC,
     host);
   item = 0; //unused variable warnings  
+}
+
+void kiptablesgenerator::slotShowForwardDialog()
+{
+  ((KLineEdit*) namedWidgets["forward_port"])->setText("");
+  ((KLineEdit*) namedWidgets["forward_destination"])->setText("");
+  ((QRadioButton*) namedWidgets["forward_incoming"])->setChecked(true);
+  
+  newForwardDialog->show();
 }
 
 void kiptablesgenerator::slotAddForward()

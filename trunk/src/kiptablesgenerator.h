@@ -83,6 +83,7 @@ protected slots:
   void slotShowServiceDialog();
   void slotAddService();
   void slotDelService();
+  void slotShowForwardDialog();
   void slotAddForward();
   void slotDelForward();
   void slotAddHost();
