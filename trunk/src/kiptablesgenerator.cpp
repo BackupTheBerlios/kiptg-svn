@@ -51,9 +51,9 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
   setupIncomingPage();
   setAppropriate(incomingPage, false); // don't show this page
   setupIPolicyPage();
-  setupIHostsPage();
   setupIConntrackPage();
   setupIPortsPage();
+  setupIHostsPage();
   setupFForwardingPage();
   setupIDefensiveChecksPage();
   setupFinishedPage();
@@ -83,7 +83,7 @@ void kiptablesgenerator::setupIHostsPage()
   KPushButton *addHost = new KPushButton(i18n("Add..."), iHostsPage);
   addHost->show();
   layout->addWidget(addHost, 1, 1);
-  connect( addHost, SIGNAL(clicked()), newHostDialog, SLOT(show()));
+  connect( addHost, SIGNAL(clicked()), this, SLOT(slotShowHostDialog()));
   
   KPushButton *delHost = new KPushButton(i18n("Remove"), iHostsPage);
   layout->addWidget(delHost, 2, 1);
@@ -637,6 +637,15 @@ void kiptablesgenerator::setupNewServiceDialog()
   newServiceDialog->setMainWidget(dialogArea);
   connect(newServiceDialog, SIGNAL(okClicked()), this, SLOT(slotAddService()));
   slotChangedProtocol(2); // TCP+UDP
+}
+
+void kiptablesgenerator::slotShowHostDialog()
+{
+  ((QRadioButton*) namedWidgets["newHost_allow"])->setChecked(true);
+  ((QRadioButton*) namedWidgets["newHost_useIP"])->setChecked(true);
+  ((KLineEdit*) namedWidgets["newHost_address"]->setText(""));
+  
+  newHostDialog->show();
 }
 
 void kiptablesgenerator::slotAddHost()
