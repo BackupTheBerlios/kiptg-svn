@@ -544,7 +544,8 @@ void kiptablesgenerator::setupNewServiceDialog()
   QLabel *intro = new QLabel(i18n(
     "<p><i>Advanced users only</i></p>"
     "<p>Here you can allow or deny access to services through your firewall.<br />"
-    "You can specify a port range in the box using this format: <tt>fromPort:toPort</tt></p>"), dialogArea);
+    "You can specify a port range in the box using this format: <tt>fromPort:toPort</tt>, "
+    "or you can specify multiple ports by seperating them with commas.</p>"), dialogArea);
   intro->show();
   layout->addMultiCellWidget(intro, 0, 0, 0, 1);
   
@@ -919,15 +920,23 @@ void kiptablesgenerator::accept()
         protocol = service->text(1),
         action = service->text(2),
         portName = service->text(3);
-        
+      
       action == i18n("Accept") ? action = "ACCEPT" : action = "DROP";
-      if (protocol == i18n("TCP & UDP") || protocol == i18n("TCP"))
-        rulesList += QString("$IPTABLES -A INPUT -p tcp -m tcp --dport %1 -j %2\n").arg(portNumber).arg(action);
-      if (protocol == i18n("TCP & UDP") || protocol == i18n("UDP"))
-        rulesList += QString("$IPTABLES -A INPUT -p udp -m udp --dport %1 -j %2\n").arg(portNumber).arg(action);
+      if ( ! portNumber.contains(",") )
+      {
+        if (protocol == i18n("TCP & UDP") || protocol == i18n("TCP"))
+          rulesList += QString("$IPTABLES -A INPUT -p tcp -m tcp --dport %1 -j %2\n").arg(portNumber).arg(action);
+        if (protocol == i18n("TCP & UDP") || protocol == i18n("UDP"))
+          rulesList += QString("$IPTABLES -A INPUT -p udp -m udp --dport %1 -j %2\n").arg(portNumber).arg(action);
+      } else {
+        if (protocol == i18n("TCP & UDP") || protocol == i18n("TCP"))
+          rulesList += QString("$IPTABLES -A INPUT -p tcp -m multiport --dports %1 -j %2\n").arg(portNumber).arg(action);
+        if (protocol == i18n("TCP & UDP") || protocol == i18n("UDP"))
+          rulesList += QString("$IPTABLES -A INPUT -p udp -m multiport --dports %1 -j %2\n").arg(portNumber).arg(action);
+      }
       if (protocol == i18n("ICMP"))
         rulesList += QString("$IPTABLES -A INPUT -p icmp -m icmp --icmp-type %1 -j %2\n").arg(portName).arg(action);
-       service = service->nextSibling();
+      service = service->nextSibling();
     }
 
     KListView* forwards = (KListView*) namedWidgets["forwardsList"];
