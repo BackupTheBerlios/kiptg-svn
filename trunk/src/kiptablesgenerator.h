@@ -78,6 +78,8 @@ protected slots:
   void slotChangedProtocol(int);
   void slotAddService();
   void slotDelService();
+	void slotAddForward();
+	void slotDelForward();
   void slotUpService();
   void slotDownService();
   void slotShownRules();

@@ -83,7 +83,7 @@ void kiptablesgenerator::setupFForwardingPage()
   
   KPushButton *delForward = new KPushButton(i18n("Remove"), fForwardingPage);
   layout->addWidget(delForward, 2, 1);
-  //TODO: make this button do something
+	connect( delForward, SIGNAL(clicked()), this, SLOT(slotDelForward()));
   
   this->addPage(fForwardingPage, i18n("Port Forwarding"));
 }
@@ -432,7 +432,10 @@ void kiptablesgenerator::setupNewForwardDialog()
   destination->show();
   layout->addWidget(destination, 3, 1);
   namedWidgets["forward_destination"] = destination;
-  
+ 
+
+	connect(newForwardDialog, SIGNAL(okClicked()), this, SLOT(slotAddForward()));
+	
   dialogArea->show();
   newForwardDialog->setMainWidget(dialogArea);
 }
@@ -525,6 +528,14 @@ void kiptablesgenerator::setupNewServiceDialog()
   newServiceDialog->setMainWidget(dialogArea);
   connect(newServiceDialog, SIGNAL(okClicked()), this, SLOT(slotAddService()));
   slotChangedProtocol(2); // TCP+UDP
+}
+
+void kiptablesgenerator::slotAddForward()
+{
+	KListView *forwards = (KListView*) namedWidgets["forwardsList"];
+	QString localPort = ((KLineEdit*) namedWidgets["forward_port"])->currentText();
+	QString destination = ((KLineEdit*) namedWidgets["forward_destination"])->currentText();
+	// TODO: finish this
 }
 
 void kiptablesgenerator::slotAddService()
@@ -667,6 +678,13 @@ void kiptablesgenerator::slotDelService()
   QListView* ports = (QListView*) namedWidgets["iPorts"];
   QListViewItem *sel = ports->selectedItem();
   if (sel) delete sel;
+}
+
+void kiptablesgenerator::slotDelForward()
+{
+	QListView* forwards = (QListView*) namedWidgets["forwardsList"];
+	QListViewItem *sel = forwards->selectedItem();
+	if (sel) delete sel;
 }
 
 void kiptablesgenerator::accept()
