@@ -881,7 +881,7 @@ void kiptablesgenerator::setupFinishedPage()
 void kiptablesgenerator::slotNewInterface()
 {
   QString interface;
-  KListBox *interfaces = (KListBox*) namedWidgets["interfaces"];
+  KListBox *interfaces = (KListBox*) namedWidgets["iInterfaces"];
   
   interface = KInputDialog::getText(i18n("Add Interface"),
     i18n("Enter the name of the interface, eg eth1"));
