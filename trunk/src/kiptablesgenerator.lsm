@@ -3,7 +3,7 @@ Title:          $APPNAME$ -- Some description
 Version:        $VERSION$
 Entered-date:   
 Description:    
-Keywords:       KDE Qt
+Keywords:       KDE Qt iptables firewall
 Author:         $AUTHOR$ <$EMAIL$>
 Maintained-by:  $AUTHOR$ <$EMAIL$>
 Home-page:      
