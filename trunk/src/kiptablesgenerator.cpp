@@ -42,6 +42,7 @@
 kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
  : KWizard(parent, name)
 {
+  setupNewForwardDialog();
   setupNewServiceDialog();
 
   setupWelcomePage();
@@ -76,11 +77,13 @@ void kiptablesgenerator::setupFForwardingPage()
   namedWidgets["forwardsList"] = ports;
   layout->addMultiCellWidget(ports, 1, 3, 0, 0);
   
-  KPushButton *addForward = new KPushButton(fForwardingPage, i18n("Add..."));
+  KPushButton *addForward = new KPushButton(i18n("Add..."), fForwardingPage);
   layout->addWidget(addForward, 1, 1);
+  connect( addForward, SIGNAL(clicked()), newForwardDialog, SLOT(show()));
   
-  KPushButton *delForward = new KPushButton(fForwardingPage, i18n("Remove"));
-  layout->addWidget(delForward, 1, 2);
+  KPushButton *delForward = new KPushButton(i18n("Remove"), fForwardingPage);
+  layout->addWidget(delForward, 2, 1);
+  //TODO: make this button do something
   
   this->addPage(fForwardingPage, i18n("Port Forwarding"));
 }
@@ -379,6 +382,59 @@ void kiptablesgenerator::setupIPortsPage()
   
   iPortsPage->show();
   this->addPage(iPortsPage, i18n("Incoming Ports"));
+}
+
+void kiptablesgenerator::setupNewForwardDialog()
+{
+  newForwardDialog = new KDialogBase(this, 0, true, i18n("Add Forward"), KDialogBase::Ok | KDialogBase::Cancel);
+  
+  QFrame *dialogArea = new QFrame(newForwardDialog);
+  QGridLayout *layout = new QGridLayout(dialogArea, 4, 2);
+  
+  QLabel *intro = new QLabel(i18n(
+      "<p><i>Advanced users only</i></p>"
+      "<p>Here you can tell netfilter to forward connections to given ports to another address/port.</p>"
+      "<p>This is using netfilter's DNAT functionality - incoming redirects go in the prerouting chain,"
+      "outgoing redirects go in the output chain.</p>"
+      "<p>The destination should be of the from destination.computer.ip.address:destinationPort</p>"), dialogArea);
+  intro->show();
+  layout->addMultiCellWidget(intro, 0, 0, 0, 1);
+  
+  QButtonGroup *direction = new QButtonGroup(dialogArea);
+  direction->hide();
+  
+  QRadioButton *incoming = new QRadioButton(i18n("&Incoming"), dialogArea);
+  incoming->setChecked(true);
+  incoming->show();
+  layout->addWidget(incoming, 1, 0);
+  namedWidgets["forward_incoming"] = incoming;
+  direction->insert(incoming);
+  
+  QRadioButton *outgoing = new QRadioButton(i18n("&Outgoing"), dialogArea);
+  outgoing->show();
+  layout->addWidget(outgoing, 1, 1);
+  direction->insert(outgoing);
+  
+  QLabel *label = new QLabel(i18n("Port:"), dialogArea);
+  label->show();
+  layout->addWidget(label, 2, 0);
+  
+  KLineEdit *port = new KLineEdit(dialogArea);
+  port->show();
+  layout->addWidget(port, 2, 1);
+  namedWidgets["forward_port"] = port;
+  
+  label = new QLabel(i18n("Destination:"), dialogArea);
+  label->show();
+  layout->addWidget(label, 3, 0);
+  
+  KLineEdit *destination = new KLineEdit(dialogArea);
+  destination->show();
+  layout->addWidget(destination, 3, 1);
+  namedWidgets["forward_destination"] = destination;
+  
+  dialogArea->show();
+  newForwardDialog->setMainWidget(dialogArea);
 }
 
 void kiptablesgenerator::setupNewServiceDialog()

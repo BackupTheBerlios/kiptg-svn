@@ -43,6 +43,7 @@ private:
   QMap<QString, unsigned int> namesToPorts;
 
   KDialogBase *newServiceDialog;
+  KDialogBase *newForwardDialog;
 
   QFrame *welcomePage;
   QFrame *interfacesPage;
@@ -57,6 +58,7 @@ private:
   RulesDialog* rulesDialog;
 
   void setupNewServiceDialog();
+  void setupNewForwardDialog();
 
   void setupWelcomePage();
   void setupInterfacesPage();
