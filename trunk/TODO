@@ -1,4 +1,3 @@
 - Dialogs when re-opened should be blank
-- Add blacklists and whitelists of IPs/MAC addresses
 - Add distribution specific stuff; location of firewall script, how to run it (eg use /sbin/runscript on gentoo
 	- some distros expect a stop() function. This will be implemented

@@ -843,6 +843,24 @@ void kiptablesgenerator::accept()
       if (! interface->isSelected())
           rulesList += QString("$IPTABLES -A INPUT -i %1 -j ACCEPT\n").arg(interface->text());
     }
+    
+    KListView* hosts = (KListView*) namedWidgets["hostsList"];
+    QListViewItem* host = hosts->firstChild();
+    while (host)
+    {
+      QString
+        accept = host->text(0),
+        ipOrMAC = host->text(1),
+        address = host->text(2),
+        action;
+      accept == i18n("Allow")
+        ? action = "ACCEPT"
+        : action = "DROP";
+      ipOrMAC == i18n("IP")
+        ? rulesList += QString("$IPTABLES -A INPUT -s %1 -j %2\n").arg(address).arg(action)
+        : rulesList += QString("$IPTABLES -A INPUT -m mac --mac-source %1 -j %2\n").arg(address).arg(action);
+      host = host->nextSibling();
+    }    
  
     if (((QCheckBox *) namedWidgets["iCheckLocalSpoof"])->isChecked())
       rulesList += "$IPTABLES -A INPUT ! -i lo -d 127.0.0.0/8 -j DROP\n";
@@ -851,7 +869,6 @@ void kiptablesgenerator::accept()
       rulesList += "$IPTABLES -N Flood-Scan\n";
       rulesList += "$IPTABLES -A INPUT -p tcp -m tcp --syn -j Flood-Scan\n";
       rulesList += "$IPTABLES -A Flood-Scan -m limit --limit 1/s --limit-burst 20 -j RETURN\n";
-      rulesList += "$IPTABLES -A Flood-Scan -j LOG --log-prefix \"OVER-LIMIT: \"\n";
       rulesList += "$IPTABLES -A Flood-Scan -j DROP\n";
     }
     if (((QCheckBox *) namedWidgets["iCheckSyn"])->isChecked())
@@ -913,19 +930,19 @@ void kiptablesgenerator::accept()
        service = service->nextSibling();
     }
 
-		KListView* forwards = (KListView*) namedWidgets["forwardsList"];
-		QListViewItem* forward = forwards->firstChild();
-		while (forward)
-		{
-			QString
-				direction = forward->text(0),
-				localPort = forward->text(1),
-				destination = forward->text(2);
-			direction == i18n("Incoming")
-				? rulesList += QString("$IPTABLES -t nat -A PREROUTING -p tcp -m tcp --dport %1 -j DNAT --to %2").arg(localPort).arg(destination)
-				: rulesList += QString("$IPTABLES -t nat -A OUTPUT -p tcp -m tcp --dport %1 -j DNAT --to %2").arg(localPort).arg(destination);
-			forward = forward->nextSibling();
-		}
+    KListView* forwards = (KListView*) namedWidgets["forwardsList"];
+    QListViewItem* forward = forwards->firstChild();
+    while (forward)
+    {
+      QString
+        direction = forward->text(0),
+        localPort = forward->text(1),
+        destination = forward->text(2);
+      direction == i18n("Incoming")
+        ? rulesList += QString("$IPTABLES -t nat -A PREROUTING -p tcp -m tcp --dport %1 -j DNAT --to %2\n").arg(localPort).arg(destination)
+        : rulesList += QString("$IPTABLES -t nat -A OUTPUT -p tcp -m tcp --dport %1 -j DNAT --to %2\n").arg(localPort).arg(destination);
+      forward = forward->nextSibling();
+    }
   }
  
   this->hide();
