@@ -666,6 +666,14 @@ void kiptablesgenerator::accept()
     
     if (((QCheckBox *) namedWidgets["iCheckLocalSpoof"])->isChecked())
       rulesList += "$IPTABLES -A INPUT ! -i lo -d 127.0.0.0/8 -j DROP\n";
+    if (((QCheckBox *) namedWidgets["iSynFloodProtect"])->isChecked())
+    {
+      rulesList += "$IPTABLES -N Flood-Scan\n";
+      rulesList += "$IPTABLES -A INPUT -p tcp -m tcp --syn -j Flood-Scan\n";
+      rulesList += "$IPTABLES -A Flood-Scan -m limit --limit 1/s --limit-burst 20 -j RETURN\n";
+      rulesList += "$IPTABLES -A Flood-Scan -j LOG --log-prefix \"OVER-LIMIT: \"\n";
+      rulesList += "$IPTABLES -A Flood-Scan -j DROP\n";
+    }
   }
  
   this->hide();
