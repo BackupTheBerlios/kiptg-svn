@@ -791,6 +791,20 @@ void kiptablesgenerator::accept()
         rulesList += QString("$IPTABLES -A INPUT -p icmp -m icmp --icmp-type %1 -j %2\n").arg(portName).arg(action);
        service = service->nextSibling();
     }
+
+		KListView* forwards = (KListView*) namedWidgets["forwardsList"];
+		QListViewItem* forward = forwards->firstChild();
+		while (forward)
+		{
+			QString
+				direction = forward->text(0),
+				localPort = forward->text(1),
+				destination = forward->text(2);
+			direction == i18n("Incoming")
+				? rulesList += QString("$IPTABLES -t nat -A PREROUTING -p tcp -m tcp --dport %1 -j DNAT --to %2").arg(localPort).arg(destination)
+				: rulesList += QString("$IPTABLES -t nat -A OUTPUT -p tcp -m tcp --dport %1 -j DNAT --to %2").arg(localPort).arg(destination);
+			forward = forward->nextSibling();
+		}
   }
  
   this->hide();
