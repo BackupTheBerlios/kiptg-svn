@@ -1,0 +1,10 @@
+Fred Emmott, 20040101
+	- Dialogs reset before showing
+	- Spacing fixes
+	- Enable/disable controls on new service dialog, based on by name/number
+		selected.
+
+Fred Emmott, 20041229
+	- Fixed automoc problems
+	- Finished port forwarding
+	- Can now match hosts
