@@ -44,26 +44,30 @@ private:
 
   KDialogBase *newServiceDialog;
   KDialogBase *newForwardDialog;
+	KDialogBase *newHostDialog;
 
   QFrame *welcomePage;
   QFrame *interfacesPage;
   QFrame *incomingPage;
   QFrame *iPolicyPage;
+  QFrame *iHostsPage;
   QFrame *iConntrackPage;
   QFrame *iPortsPage;
-  QFrame *iDefensiveChecksPage;
   QFrame *fForwardingPage;
+  QFrame *iDefensiveChecksPage;
   QFrame *finishedPage;
 
   RulesDialog* rulesDialog;
 
   void setupNewServiceDialog();
   void setupNewForwardDialog();
+  void setupNewHostDialog();
 
   void setupWelcomePage();
   void setupInterfacesPage();
   void setupIncomingPage();
   void setupIPolicyPage();
+  void setupIHostsPage();
   void setupIConntrackPage();
   void setupIPortsPage();
   void setupIDefensiveChecksPage();
@@ -78,8 +82,10 @@ protected slots:
   void slotChangedProtocol(int);
   void slotAddService();
   void slotDelService();
-	void slotAddForward();
-	void slotDelForward();
+  void slotAddForward();
+  void slotDelForward();
+  void slotAddHost() {};
+  void slotDelHost() {};
   void slotUpService();
   void slotDownService();
   void slotShownRules();

@@ -634,7 +634,7 @@ clean-metasources:
 	-rm -f  rulesdialog.moc kiptablesgenerator.moc
 
 #>+ 2
-KDE_DIST=kiptablesgenerator.lsm hi16-app-kiptablesgenerator.png kiptablesgenerator findtodos.sh kiptablesgenerator.desktop hi32-app-kiptablesgenerator.png 
+KDE_DIST=kiptablesgenerator.lsm hi16-app-kiptablesgenerator.png findtodos.sh kiptablesgenerator.desktop hi32-app-kiptablesgenerator.png 
 
 #>+ 2
 docs-am:

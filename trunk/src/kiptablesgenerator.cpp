@@ -44,18 +44,52 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
 {
   setupNewForwardDialog();
   setupNewServiceDialog();
+  setupNewHostDialog();
 
   setupWelcomePage();
   setupInterfacesPage();
   setupIncomingPage();
   setAppropriate(incomingPage, false); // don't show this page
   setupIPolicyPage();
+  setupIHostsPage();
   setupIConntrackPage();
   setupIPortsPage();
   setupFForwardingPage();
   setupIDefensiveChecksPage();
   setupFinishedPage();
   helpButton()->hide();
+}
+
+void kiptablesgenerator::setupIHostsPage()
+{
+  iHostsPage = new QFrame(this);
+  
+  QGridLayout *layout = new QGridLayout(iHostsPage, 4, 2);
+  QLabel *label = new QLabel(i18n(
+    "<p><i>Advanced users only</i> - If you wish to allow or block any specific hosts, "
+    "ignoring all other rules, add them to this page.</p>"),
+    iHostsPage);
+  label->show();
+  layout->addMultiCellWidget(label, 0, 0, 0, 1);
+  
+  KListView *hosts = new KListView(iHostsPage);
+  hosts->addColumn(i18n("Allow/Block"));
+  hosts->addColumn(i18n("MAC/IP"));
+  hosts->addColumn(i18n("Host"));
+  hosts->show();
+  namedWidgets["hostsList"] = hosts;
+  layout->addMultiCellWidget(hosts, 1, 3, 0, 0);
+  
+  KPushButton *addHost = new KPushButton(i18n("Add..."), iHostsPage);
+  addHost->show();
+  layout->addWidget(addHost, 1, 1);
+  connect( addHost, SIGNAL(clicked()), newHostDialog, SLOT(show()));
+  
+  KPushButton *delHost = new KPushButton(i18n("Remove"), iHostsPage);
+  layout->addWidget(delHost, 2, 1);
+  connect( delHost, SIGNAL(clicked()), this, SLOT(slotDelHost()));
+  
+  this->addPage(iHostsPage, i18n("Host Controll"));
 }
 
 void kiptablesgenerator::setupFForwardingPage()
@@ -83,7 +117,7 @@ void kiptablesgenerator::setupFForwardingPage()
   
   KPushButton *delForward = new KPushButton(i18n("Remove"), fForwardingPage);
   layout->addWidget(delForward, 2, 1);
-	connect( delForward, SIGNAL(clicked()), this, SLOT(slotDelForward()));
+  connect( delForward, SIGNAL(clicked()), this, SLOT(slotDelForward()));
   
   this->addPage(fForwardingPage, i18n("Port Forwarding"));
 }
@@ -384,6 +418,64 @@ void kiptablesgenerator::setupIPortsPage()
   this->addPage(iPortsPage, i18n("Incoming Ports"));
 }
 
+void kiptablesgenerator::setupNewHostDialog()
+{
+  newHostDialog = new KDialogBase(this, 0, true, i18n("Add Host"), KDialogBase::Ok | KDialogBase::Cancel);
+  
+  QFrame *dialogArea = new QFrame(newHostDialog);
+  QGridLayout *layout = new QGridLayout(dialogArea, 5, 2);
+  
+  QLabel *intro = new QLabel(i18n(
+    "<p>Here you can tell netfilter to allow all connections from a given host regardless of other rules, "
+    "or block all connections from a given host regardless of other rules.</p>"
+    "<p>You can specify a host either by IP address or MAC address.</p>"), dialogArea);
+  intro->show();
+  layout->addMultiCellWidget(intro, 0, 0, 0, 1);
+
+  QButtonGroup *whitelistOrBlacklist = new QButtonGroup(dialogArea);
+  whitelistOrBlacklist->hide();
+  
+  QRadioButton *whitelist = new QRadioButton(i18n("&Allow"), dialogArea);
+  whitelist->setChecked(true);
+  whitelist->show();
+  layout->addWidget(whitelist, 1, 0);
+  namedWidgets["newHost_allow"] = whitelist;
+  whitelistOrBlacklist->insert(whitelist);
+  
+  QRadioButton *blacklist = new QRadioButton(i18n("&Block"), dialogArea);
+  blacklist->setChecked(false);
+  blacklist->show();
+  layout->addWidget(blacklist, 1, 1);
+  whitelistOrBlacklist->insert(blacklist);
+  
+  QButtonGroup *ipOrMAC = new QButtonGroup(dialogArea);
+  ipOrMAC->hide();
+  
+  QRadioButton *useIP = new QRadioButton(i18n("&Use IP"), dialogArea);
+  useIP->setChecked(true);
+  useIP->show();
+  layout->addWidget(useIP, 2, 0);
+  namedWidgets["newHost_useIP"] = useIP;
+  ipOrMAC->insert(useIP);
+  
+  QRadioButton *useMAC = new QRadioButton(i18n("U&se MAC"), dialogArea);
+  useMAC->show();
+  layout->addWidget(useMAC, 2, 1);
+  ipOrMAC->insert(useMAC);
+  
+  QLabel *hostLabel = new QLabel(i18n("Host:"), dialogArea);
+  hostLabel->show();
+  layout->addMultiCellWidget(hostLabel, 3, 3, 0, 1);
+  
+  KLineEdit *host = new KLineEdit(dialogArea);
+  host->show();
+  namedWidgets["newHost_address"] = host;
+  layout->addMultiCellWidget(host, 4, 4, 0, 1);
+  
+  dialogArea->show();
+  newHostDialog->setMainWidget(dialogArea);
+}
+
 void kiptablesgenerator::setupNewForwardDialog()
 {
   newForwardDialog = new KDialogBase(this, 0, true, i18n("Add Forward"), KDialogBase::Ok | KDialogBase::Cancel);
@@ -434,7 +526,7 @@ void kiptablesgenerator::setupNewForwardDialog()
   namedWidgets["forward_destination"] = destination;
  
 
-	connect(newForwardDialog, SIGNAL(okClicked()), this, SLOT(slotAddForward()));
+  connect(newForwardDialog, SIGNAL(okClicked()), this, SLOT(slotAddForward()));
 	
   dialogArea->show();
   newForwardDialog->setMainWidget(dialogArea);
