@@ -643,7 +643,7 @@ void kiptablesgenerator::slotShowHostDialog()
 {
   ((QRadioButton*) namedWidgets["newHost_allow"])->setChecked(true);
   ((QRadioButton*) namedWidgets["newHost_useIP"])->setChecked(true);
-  ((KLineEdit*) namedWidgets["newHost_address"]->setText(""));
+  ((KLineEdit*) namedWidgets["newHost_address"])->setText("");
   
   newHostDialog->show();
 }
