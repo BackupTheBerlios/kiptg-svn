@@ -65,6 +65,8 @@ void kiptablesgenerator::setupIHostsPage()
   iHostsPage = new QFrame(this);
   
   QGridLayout *layout = new QGridLayout(iHostsPage, 4, 2);
+  layout->setSpacing(KDialogBase::spacingHint());
+  
   QLabel *label = new QLabel(i18n(
     "<p><i>Advanced users only</i> - If you wish to allow or block any specific hosts, "
     "ignoring all other rules, add them to this page.</p>"),
@@ -97,6 +99,8 @@ void kiptablesgenerator::setupFForwardingPage()
   fForwardingPage = new QFrame(this);
   
   QGridLayout *layout = new QGridLayout(fForwardingPage, 4, 2);
+  layout->setSpacing(KDialogBase::spacingHint());
+  
   QLabel *label = new QLabel(i18n(
     "<p>If you wish to enable TCP forwardind for any ports (incoming or outgoing) add them to this page.</p>"),
     fForwardingPage);
@@ -127,6 +131,7 @@ void kiptablesgenerator::setupWelcomePage()
   welcomePage = new QFrame(this);
 
   QVBoxLayout *layout = new QVBoxLayout(welcomePage);
+  layout->setSpacing(KDialogBase::spacingHint());
 
   QLabel *label = new QLabel(i18n(
     "<p>Welcome to KIptablesGenerator.</p>"
@@ -146,6 +151,7 @@ void kiptablesgenerator::setupIncomingPage()
   incomingPage = new QFrame(this);
   
   QGridLayout *layout = new QGridLayout(incomingPage, 2, 2);
+  layout->setSpacing(KDialogBase::spacingHint());
   
   QLabel *intro = new QLabel(i18n(
     "<p>Do you want to filter incoming data? (recommended)</p>"
@@ -180,6 +186,7 @@ void kiptablesgenerator::setupIPolicyPage()
   iPolicyPage = new QFrame(this);
   
   QVBoxLayout *layout = new QVBoxLayout(iPolicyPage);
+  layout->setSpacing(KDialogBase::spacingHint());
   
   QLabel *intro = new QLabel(i18n(
     "<p>What do you want your firewall to do to unmatched packets?</p>"
@@ -206,6 +213,7 @@ void kiptablesgenerator::setupInterfacesPage()
   interfacesPage = new QFrame(this);
   
   QVBoxLayout *layout = new QVBoxLayout(interfacesPage);
+  layout->setSpacing(KDialogBase::spacingHint());
   
   QLabel *intro = new QLabel(i18n(
     "<p>Which of the following interfaces do you want to filter?</p>"
@@ -242,6 +250,7 @@ void kiptablesgenerator::setupIConntrackPage()
 {
   iConntrackPage = new QFrame(this);
   QGridLayout *layout = new QGridLayout(iConntrackPage, 7, 4);
+  layout->setSpacing(KDialogBase::spacingHint());
   
   QLabel *intro = new QLabel(i18n( "<p><i>Advanced users only</i> - "
     "The defaults here are sensible, and will work for most users.</p>"
@@ -377,6 +386,7 @@ void kiptablesgenerator::setupIPortsPage()
 {
   iPortsPage = new QFrame(this);
   QGridLayout *layout = new QGridLayout(iPortsPage, 6, 2);
+  layout->setSpacing(KDialogBase::spacingHint());
   
   QLabel *intro = new QLabel(
     i18n("<p>Here you can select which services are available to the outside world.</p>"),
@@ -424,6 +434,7 @@ void kiptablesgenerator::setupNewHostDialog()
   
   QFrame *dialogArea = new QFrame(newHostDialog);
   QGridLayout *layout = new QGridLayout(dialogArea, 5, 2);
+  layout->setSpacing(KDialogBase::spacingHint());
   
   QLabel *intro = new QLabel(i18n(
     "<p>Here you can tell netfilter to allow all connections from a given host regardless of other rules, "
@@ -484,6 +495,7 @@ void kiptablesgenerator::setupNewForwardDialog()
   
   QFrame *dialogArea = new QFrame(newForwardDialog);
   QGridLayout *layout = new QGridLayout(dialogArea, 4, 2);
+  layout->setSpacing(KDialogBase::spacingHint());
   
   QLabel *intro = new QLabel(i18n(
       "<p><i>Advanced users only</i></p>"
@@ -554,6 +566,7 @@ void kiptablesgenerator::setupNewServiceDialog()
   
   QFrame *dialogArea = new QFrame(newServiceDialog);
   QGridLayout *layout = new QGridLayout(dialogArea, 7, 2);
+  layout->setSpacing(KDialogBase::spacingHint());
   
   QLabel *intro = new QLabel(i18n(
     "<p><i>Advanced users only</i></p>"
@@ -744,6 +757,7 @@ void kiptablesgenerator::setupIDefensiveChecksPage()
   iDefensiveChecksPage = new QFrame(this);
   
   QVBoxLayout *layout = new QVBoxLayout(iDefensiveChecksPage);
+  layout->setSpacing(KDialogBase::spacingHint());
   
   QLabel *summary = new QLabel(i18n(
     "<p>This page allows you to enable additional checks to help protect your system "
