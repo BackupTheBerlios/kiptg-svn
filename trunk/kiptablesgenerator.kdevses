@@ -2,11 +2,11 @@
 <!DOCTYPE KDevPrjSession>
 <KDevPrjSession>
  <DocsAndViews NumberOfDocuments="2" >
-  <Doc0 NumberOfViews="1" URL="file:/home/fred/kiptablesgenerator/src/kiptablesgenerator.h" >
-   <View0 Type="Source" />
+  <Doc0 NumberOfViews="1" URL="file:/home/fred/source/kiptablesgenerator/src/kiptablesgenerator.h" >
+   <View0 line="86" Type="Source" />
   </Doc0>
-  <Doc1 NumberOfViews="1" URL="file:/home/fred/kiptablesgenerator/src/kiptablesgenerator.cpp" >
-   <View0 line="80" Type="Source" />
+  <Doc1 NumberOfViews="1" URL="file:/home/fred/source/kiptablesgenerator/src/kiptablesgenerator.cpp" >
+   <View0 line="629" Type="Source" />
   </Doc1>
  </DocsAndViews>
  <pluginList>

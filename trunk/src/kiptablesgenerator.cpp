@@ -89,7 +89,7 @@ void kiptablesgenerator::setupIHostsPage()
   layout->addWidget(delHost, 2, 1);
   connect( delHost, SIGNAL(clicked()), this, SLOT(slotDelHost()));
   
-  this->addPage(iHostsPage, i18n("Host Controll"));
+  this->addPage(iHostsPage, i18n("Host Control"));
 }
 
 void kiptablesgenerator::setupFForwardingPage()
@@ -472,6 +472,8 @@ void kiptablesgenerator::setupNewHostDialog()
   namedWidgets["newHost_address"] = host;
   layout->addMultiCellWidget(host, 4, 4, 0, 1);
   
+  connect(newHostDialog, SIGNAL(okClicked()), this, SLOT(slotAddHost()));
+  
   dialogArea->show();
   newHostDialog->setMainWidget(dialogArea);
 }
@@ -622,22 +624,42 @@ void kiptablesgenerator::setupNewServiceDialog()
   slotChangedProtocol(2); // TCP+UDP
 }
 
+void kiptablesgenerator::slotAddHost()
+{
+  KListView *hosts = (KListView*) namedWidgets["hostsList"];
+  
+  QString allowOrBlock, ipOrMAC;
+  ((QRadioButton*) namedWidgets["newHost_allow"])->isChecked()
+    ? allowOrBlock = i18n("Allow")
+    : allowOrBlock = i18n("Block");
+  ((QRadioButton*) namedWidgets["newHost_useIP"])->isChecked()
+    ? ipOrMAC = i18n("IP")
+    : ipOrMAC = i18n("MAC");
+  QString host = ((KLineEdit*) namedWidgets["newHost_address"])->text();
+  
+  KListViewItem *item = new KListViewItem(hosts,
+    allowOrBlock,
+    ipOrMAC,
+    host);
+  item = 0; //unused variable warnings  
+}
+
 void kiptablesgenerator::slotAddForward()
 {
-	KListView *forwards = (KListView*) namedWidgets["forwardsList"];
-	QString localPort = ((KLineEdit*) namedWidgets["forward_port"])->text();
-	QString destination = ((KLineEdit*) namedWidgets["forward_destination"])->text();
+  KListView *forwards = (KListView*) namedWidgets["forwardsList"];
+  QString localPort = ((KLineEdit*) namedWidgets["forward_port"])->text();
+  QString destination = ((KLineEdit*) namedWidgets["forward_destination"])->text();
 
-	QString direction;
-	((QRadioButton*) namedWidgets["forward_incoming"])->isChecked()
-		? direction = i18n("Incoming")
-		: direction = i18n("Outgoing");
+  QString direction;
+  ((QRadioButton*) namedWidgets["forward_incoming"])->isChecked()
+    ? direction = i18n("Incoming")
+    : direction = i18n("Outgoing");
 
-	KListViewItem *item = new KListViewItem(forwards,
-		direction,
-		localPort,
-		destination);
-	item = 0; // stop unused variable warnings
+  KListViewItem *item = new KListViewItem(forwards,
+    direction,
+    localPort,
+    destination);
+    item = 0; // stop unused variable warnings
 }
 
 void kiptablesgenerator::slotAddService()
@@ -784,9 +806,16 @@ void kiptablesgenerator::slotDelService()
 
 void kiptablesgenerator::slotDelForward()
 {
-	QListView* forwards = (QListView*) namedWidgets["forwardsList"];
-	QListViewItem *sel = forwards->selectedItem();
-	if (sel) delete sel;
+  QListView* forwards = (QListView*) namedWidgets["forwardsList"];
+  QListViewItem *sel = forwards->selectedItem();
+  if (sel) delete sel;
+}
+
+void kiptablesgenerator::slotDelHost()
+{
+  QListView* hosts = (QListView*) namedWidgets["hostsList"];
+  QListViewItem *sel = hosts->selectedItem();
+  if (sel) delete sel;
 }
 
 void kiptablesgenerator::accept()

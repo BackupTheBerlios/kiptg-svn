@@ -84,8 +84,8 @@ protected slots:
   void slotDelService();
   void slotAddForward();
   void slotDelForward();
-  void slotAddHost() {};
-  void slotDelHost() {};
+  void slotAddHost();
+  void slotDelHost();
   void slotUpService();
   void slotDownService();
   void slotShownRules();
