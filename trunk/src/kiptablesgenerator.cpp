@@ -765,6 +765,8 @@ kiptablesgenerator::~kiptablesgenerator()
   delete incomingPage;
   delete iPolicyPage;
   delete iPortsPage;
+  delete iDefensiveChecksPage;
+  delete finishedPage;
 }
 
 
