@@ -533,9 +533,19 @@ void kiptablesgenerator::setupNewServiceDialog()
 void kiptablesgenerator::slotAddForward()
 {
 	KListView *forwards = (KListView*) namedWidgets["forwardsList"];
-	QString localPort = ((KLineEdit*) namedWidgets["forward_port"])->currentText();
-	QString destination = ((KLineEdit*) namedWidgets["forward_destination"])->currentText();
-	// TODO: finish this
+	QString localPort = ((KLineEdit*) namedWidgets["forward_port"])->text();
+	QString destination = ((KLineEdit*) namedWidgets["forward_destination"])->text();
+
+	QString direction;
+	((QRadioButton*) namedWidgets["forward_incoming"])->isChecked()
+		? direction = i18n("Incoming")
+		: direction = i18n("Outgoing");
+
+	KListViewItem *item = new KListViewItem(forwards,
+		direction,
+		localPort,
+		destination);
+	item = 0; // stop unused variable warnings
 }
 
 void kiptablesgenerator::slotAddService()
