@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 by Fred Emmott                                     *
+ *   Copyright (C) 2004-2005 by Fred Emmott                                     *
  *   mail@fredemmott.co.uk                                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -44,9 +44,10 @@ private:
 
   KDialogBase *newServiceDialog;
   KDialogBase *newForwardDialog;
-	KDialogBase *newHostDialog;
+  KDialogBase *newHostDialog;
 
   QFrame *welcomePage;
+  QFrame *distroPage;
   QFrame *interfacesPage;
   QFrame *incomingPage;
   QFrame *iPolicyPage;
@@ -64,6 +65,7 @@ private:
   void setupNewHostDialog();
 
   void setupWelcomePage();
+  void setupDistroPage();
   void setupInterfacesPage();
   void setupIncomingPage();
   void setupIPolicyPage();
@@ -73,10 +75,16 @@ private:
   void setupIDefensiveChecksPage();
   void setupFForwardingPage();
   void setupFinishedPage();
+  
 public:
+  enum distros {
+    KIPTG_SLACKWARE,
+    KIPTG_GENTOO
+  };
   kiptablesgenerator(QWidget *parent = 0, const char *name = 0);
 
   ~kiptablesgenerator();
+  void makeScript(QString &rulesList, QString &undoList, int distro);
 protected slots:
   void slotNewInterface();
   void slotChangedProtocol(int);

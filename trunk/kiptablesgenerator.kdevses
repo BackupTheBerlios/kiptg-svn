@@ -3,17 +3,17 @@
 <KDevPrjSession>
  <DocsAndViews NumberOfDocuments="2" >
   <Doc0 NumberOfViews="1" URL="file:/home/fred/source/kiptablesgenerator/src/kiptablesgenerator.h" >
-   <View0 line="90" Type="Source" />
+   <View0 Type="Source" />
   </Doc0>
   <Doc1 NumberOfViews="1" URL="file:/home/fred/source/kiptablesgenerator/src/kiptablesgenerator.cpp" >
-   <View0 line="708" Type="Source" />
+   <View0 line="710" Type="Source" />
   </Doc1>
  </DocsAndViews>
  <pluginList>
   <kdevbookmarks>
    <bookmarks>
     <bookmark url="/home/fred/source/kiptablesgenerator/src/kiptablesgenerator.cpp" >
-     <mark line="901" />
+     <mark line="905" />
     </bookmark>
    </bookmarks>
   </kdevbookmarks>
@@ -27,7 +27,9 @@
    <kcachegrind path="" />
   </kdevvalgrind>
   <kdevdebugger>
-   <breakpointList/>
+   <breakpointList>
+    <breakpoint0 location="/home/fred/source/kiptablesgenerator/src/kiptablesgenerator.cpp:565" type="1" condition="" enabled="1" />
+   </breakpointList>
   </kdevdebugger>
  </pluginList>
 </KDevPrjSession>
