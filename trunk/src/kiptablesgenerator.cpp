@@ -609,7 +609,20 @@ void kiptablesgenerator::accept()
       if (! interface->isSelected())
           rulesList += QString("$IPTABLES -A INPUT -i %1 -j ACCEPT\n").arg(interface->text());
     }
-      
+ 
+    if (((QCheckBox *) namedWidgets["iCheckLocalSpoof"])->isChecked())
+      rulesList += "$IPTABLES -A INPUT ! -i lo -d 127.0.0.0/8 -j DROP\n";
+    if (((QCheckBox *) namedWidgets["iSynFloodProtect"])->isChecked())
+    {
+      rulesList += "$IPTABLES -N Flood-Scan\n";
+      rulesList += "$IPTABLES -A INPUT -p tcp -m tcp --syn -j Flood-Scan\n";
+      rulesList += "$IPTABLES -A Flood-Scan -m limit --limit 1/s --limit-burst 20 -j RETURN\n";
+      rulesList += "$IPTABLES -A Flood-Scan -j LOG --log-prefix \"OVER-LIMIT: \"\n";
+      rulesList += "$IPTABLES -A Flood-Scan -j DROP\n";
+    }
+    if (((QCheckBox *) namedWidgets["iCheckSyn"])->isChecked())
+      rulesList += "$IPTABLES -A INPUT -p tcp -m tcp ! --syn -m conntrack --ctstate NEW -j DROP\n";
+         
     if ( ((QCheckBox*) namedWidgets["iConntrackAllSame"])->isChecked() )
     {
       if ( ((QCheckBox*) namedWidgets["iConntrackAllEstablished"])->isChecked() )
@@ -662,17 +675,6 @@ void kiptablesgenerator::accept()
       if (protocol == i18n("ICMP"))
         rulesList += QString("$IPTABLES -A INPUT -p icmp -m icmp --icmp-type %1 -j %2\n").arg(portName).arg(action);
        service = service->nextSibling();
-    }
-    
-    if (((QCheckBox *) namedWidgets["iCheckLocalSpoof"])->isChecked())
-      rulesList += "$IPTABLES -A INPUT ! -i lo -d 127.0.0.0/8 -j DROP\n";
-    if (((QCheckBox *) namedWidgets["iSynFloodProtect"])->isChecked())
-    {
-      rulesList += "$IPTABLES -N Flood-Scan\n";
-      rulesList += "$IPTABLES -A INPUT -p tcp -m tcp --syn -j Flood-Scan\n";
-      rulesList += "$IPTABLES -A Flood-Scan -m limit --limit 1/s --limit-burst 20 -j RETURN\n";
-      rulesList += "$IPTABLES -A Flood-Scan -j LOG --log-prefix \"OVER-LIMIT: \"\n";
-      rulesList += "$IPTABLES -A Flood-Scan -j DROP\n";
     }
   }
  
