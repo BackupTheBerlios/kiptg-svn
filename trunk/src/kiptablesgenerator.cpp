@@ -51,6 +51,7 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
   setupIPolicyPage();
   setupIConntrackPage();
   setupIPortsPage();
+  setupIDefensiveChecksPage();
   setupFinishedPage();
   helpButton()->hide();
 }
@@ -395,18 +396,19 @@ void kiptablesgenerator::setupNewServiceDialog()
   optNamedOrNumbered->insert(optNamed);
   optNamed->show();
   layout->addWidget(optNamed, 3, 0);
+  namedWidgets["newService_named"] = optNamed;
   
   KComboBox *names = new KComboBox(dialogArea);
   names->show();
   layout->addWidget(names, 3, 1);
   namedWidgets["newService_names"] = names;
-  slotChangedProtocol(2); // TCP+UDP
   
   QRadioButton *optNumbered = new QRadioButton(i18n("&Port number(s): "), dialogArea);
   optNumbered->setName("numbered");
   optNamedOrNumbered->insert(optNumbered);
   optNumbered->show();
   layout->addWidget(optNumbered, 4, 0);
+  namedWidgets["newService_numbered"] = optNumbered;
   
   KLineEdit *ports = new KLineEdit(dialogArea);
   ports->show();
@@ -437,6 +439,7 @@ void kiptablesgenerator::setupNewServiceDialog()
   dialogArea->show();
   newServiceDialog->setMainWidget(dialogArea);
   connect(newServiceDialog, SIGNAL(okClicked()), this, SLOT(slotAddService()));
+  slotChangedProtocol(2); // TCP+UDP
 }
 
 void kiptablesgenerator::slotAddService()
@@ -473,6 +476,48 @@ void kiptablesgenerator::slotAddService()
     action,
     portName);
   item = 0; // stop unused variable warnings
+}
+
+void kiptablesgenerator::setupIDefensiveChecksPage()
+{
+  iDefensiveChecksPage = new QFrame(this);
+  
+  QVBoxLayout *layout = new QVBoxLayout(iDefensiveChecksPage);
+  
+  QLabel *summary = new QLabel(i18n(
+    "<p>This page allows you to enable additional checks to help protect your system "
+    "from common firewall evasion techniques, DOS attacks, and other malicious activities.</p>"
+    "<p>If you don't understand the above, the defaults provided are suitable for most systems.</p>"),
+    iDefensiveChecksPage);
+  summary->show();
+  layout->addWidget(summary);
+  
+  QCheckBox *localSpoof = new QCheckBox(i18n("&Block spoofed local packages"), iDefensiveChecksPage);
+  localSpoof->setChecked(true);
+  localSpoof->show();
+  layout->addWidget(localSpoof);
+  namedWidgets["iCheckLocalSpoof"] = localSpoof;
+  
+  QCheckBox *synFlood = new QCheckBox(i18n("&SYN-flood protection"), iDefensiveChecksPage);
+  synFlood->setChecked(true);
+  synFlood->show();
+  layout->addWidget(synFlood);
+  namedWidgets["iSynFloodProtect"] = synFlood;
+  
+  QCheckBox *checkSyn = new QCheckBox(i18n("&Check new connections start with a SYN packet"), iDefensiveChecksPage);
+  checkSyn->setChecked(true);
+  checkSyn->show();
+  layout->addWidget(checkSyn);
+  namedWidgets["iCheckSyn"] = checkSyn;
+  
+  QCheckBox *checkSynFin = new QCheckBox(i18n("&Drop packets with both SYN and FIN flags set"), iDefensiveChecksPage);
+  checkSynFin->setChecked(true);
+  checkSynFin->show();
+  layout->addWidget(checkSynFin);
+  namedWidgets["iCheckSynFin"] = checkSynFin;
+  
+  iDefensiveChecksPage->show();
+  this->addPage(iDefensiveChecksPage, i18n("Defensive Checks"));
 }
 
 void kiptablesgenerator::setupFinishedPage()
@@ -650,10 +695,13 @@ void kiptablesgenerator::slotChangedProtocol(int newProtocol)
     names->insertItem("POP3S");
     names->insertItem("IMAP");
     names->insertItem("IMAPS");
+    ((QRadioButton *) namedWidgets["newService_numbered"])->setEnabled(true);
     return;
   }
+  ((QRadioButton *) namedWidgets["newService_numbered"])->setEnabled(false);
+  ((QRadioButton *) namedWidgets["newService_named"])->setChecked(true);
   names->insertItem("any");
-	names->insertItem("echo-reply");
+  names->insertItem("echo-reply");
   names->insertItem("destination-unreachable");
   names->insertItem(" network-unreachable");
   names->insertItem(" host-unreachable");

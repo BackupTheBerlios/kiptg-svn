@@ -675,13 +675,6 @@ messages: rc.cpp
 .NOEXPORT:
 
 #>+ 3
-rulesdialog.moc: $(srcdir)/rulesdialog.h
-	$(MOC) $(srcdir)/rulesdialog.h -o rulesdialog.moc
-
-#>+ 2
-mocs: rulesdialog.moc
-
-#>+ 3
 kiptablesgenerator.moc: $(srcdir)/kiptablesgenerator.h
 	$(MOC) $(srcdir)/kiptablesgenerator.h -o kiptablesgenerator.moc
 
@@ -689,25 +682,32 @@ kiptablesgenerator.moc: $(srcdir)/kiptablesgenerator.h
 mocs: kiptablesgenerator.moc
 
 #>+ 3
-clean-metasources:
-	-rm -f  rulesdialog.moc kiptablesgenerator.moc
+rulesdialog.moc: $(srcdir)/rulesdialog.h
+	$(MOC) $(srcdir)/rulesdialog.h -o rulesdialog.moc
 
 #>+ 2
-KDE_DIST=hi16-app-kiptablesgenerator.png kiptablesgenerator.lsm Makefile.in hi32-app-kiptablesgenerator.png Makefile.am findtodos.sh kiptablesgenerator.desktop 
+mocs: rulesdialog.moc
+
+#>+ 3
+clean-metasources:
+	-rm -f  kiptablesgenerator.moc rulesdialog.moc
+
+#>+ 2
+KDE_DIST=hi16-app-kiptablesgenerator.png kiptablesgenerator.lsm Makefile.in findtodos.sh kiptablesgenerator.desktop hi32-app-kiptablesgenerator.png Makefile.am 
 
 #>+ 2
 docs-am:
 
 #>+ 10
 install-kde-icons:
-	$(mkinstalldirs) $(DESTDIR)$(kde_icondir)/hicolor/16x16/apps
-	$(INSTALL_DATA) $(srcdir)/hi16-app-kiptablesgenerator.png $(DESTDIR)$(kde_icondir)/hicolor/16x16/apps/kiptablesgenerator.png
 	$(mkinstalldirs) $(DESTDIR)$(kde_icondir)/hicolor/32x32/apps
 	$(INSTALL_DATA) $(srcdir)/hi32-app-kiptablesgenerator.png $(DESTDIR)$(kde_icondir)/hicolor/32x32/apps/kiptablesgenerator.png
+	$(mkinstalldirs) $(DESTDIR)$(kde_icondir)/hicolor/16x16/apps
+	$(INSTALL_DATA) $(srcdir)/hi16-app-kiptablesgenerator.png $(DESTDIR)$(kde_icondir)/hicolor/16x16/apps/kiptablesgenerator.png
 
 uninstall-kde-icons:
-	-rm -f $(DESTDIR)$(kde_icondir)/hicolor/16x16/apps/kiptablesgenerator.png
 	-rm -f $(DESTDIR)$(kde_icondir)/hicolor/32x32/apps/kiptablesgenerator.png
+	-rm -f $(DESTDIR)$(kde_icondir)/hicolor/16x16/apps/kiptablesgenerator.png
 
 #>+ 15
 force-reedit:
@@ -748,7 +748,7 @@ bcheck-am:
 
 
 #>+ 11
-kiptablesgenerator.all_cpp.cpp: $(srcdir)/Makefile.in $(srcdir)/main.cpp $(srcdir)/kiptablesgenerator.cpp $(srcdir)/rulesdialog.cpp  kiptablesgenerator.moc rulesdialog.moc
+kiptablesgenerator.all_cpp.cpp: $(srcdir)/Makefile.in $(srcdir)/main.cpp $(srcdir)/kiptablesgenerator.cpp $(srcdir)/rulesdialog.cpp  rulesdialog.moc kiptablesgenerator.moc
 	@echo 'creating kiptablesgenerator.all_cpp.cpp ...'; \
 	rm -f kiptablesgenerator.all_cpp.files kiptablesgenerator.all_cpp.final; \
 	echo "#define KDE_USE_FINAL 1" >> kiptablesgenerator.all_cpp.final; \

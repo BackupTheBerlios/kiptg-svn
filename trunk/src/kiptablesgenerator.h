@@ -50,6 +50,7 @@ private:
   QFrame *iPolicyPage;
   QFrame *iConntrackPage;
   QFrame *iPortsPage;
+  QFrame *iDefensiveChecksPage;
   QFrame *finishedPage;
   
   RulesDialog* rulesDialog;
@@ -62,6 +63,7 @@ private:
   void setupIPolicyPage();
   void setupIConntrackPage();
   void setupIPortsPage();
+  void setupIDefensiveChecksPage();
   void setupFinishedPage();
 public:
   kiptablesgenerator(QWidget *parent = 0, const char *name = 0);

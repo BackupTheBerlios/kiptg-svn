@@ -776,7 +776,7 @@ dist-hook:
 .NOEXPORT:
 
 #>+ 2
-KDE_DIST=stamp-h.in subdirs kiptablesgenerator.kdevelop Makefile.in kiptablesgenerator.kdevelop.pcs configure.files kiptablesgenerator.kdevses config.h.in configure.in Makefile.cvs aclocal.m4 Doxyfile Makefile.am acinclude.m4 configure 
+KDE_DIST=stamp-h.in subdirs kiptablesgenerator.kdevelop Makefile.in kiptablesgenerator.kdevelop.pcs configure.files config.h.in kiptablesgenerator.kdevses configure.in Makefile.cvs aclocal.m4 Doxyfile Makefile.am configure acinclude.m4 
 
 #>+ 2
 docs-am:
