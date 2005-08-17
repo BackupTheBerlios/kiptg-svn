@@ -198,6 +198,8 @@ void kiptablesgenerator::setupWelcomePage()
     "and ICMP kernel modules loaded.</p>"), welcomePage);
   label->show();  
   layout->addWidget(label);
+  
+  layout->addItem(new QSpacerItem(0,0,QSizePolicy::Ignored, QSizePolicy::Ignored));
 
   welcomePage->show();
   this->addPage(welcomePage, i18n("Welcome"));
@@ -212,7 +214,7 @@ void kiptablesgenerator::setupDistroPage()
   
   QLabel *label = new QLabel(i18n(
     "<p>Please select which distribution you wish to use the "
-    "produced script on.</p>"), distroPage);
+    "produced script on:</p>"), distroPage);
   label->show();
   layout->addWidget(label);
   
@@ -223,8 +225,12 @@ void kiptablesgenerator::setupDistroPage()
   layout->addWidget(distroList);
   namedWidgets["distro"] = distroList;
   
-  QSpacerItem *spacer = new QSpacerItem(20, 20, QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
-  layout->addItem(spacer);
+  label = new QLabel(i18n(
+  	"<p><i>Note: If your distribution isn't listed, the Slackware script should work on any distribution.</i></p>"), distroPage);
+  label->show();
+  layout->addWidget(label);
+  
+  layout->addItem(new QSpacerItem(0,0, QSizePolicy::Ignored, QSizePolicy::Ignored));
   
   distroPage->show();
   this->addPage(distroPage, i18n("Distribution"));
@@ -343,6 +349,8 @@ void kiptablesgenerator::setupIPolicyPage()
   layout->addWidget(options);
   namedWidgets["incomingPolicy"] = options;
   
+  layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Ignored, QSizePolicy::Ignored));
+  
   iPolicyPage->show();
   this->addPage(iPolicyPage, i18n("Default Action"));
 }
@@ -388,7 +396,7 @@ void kiptablesgenerator::setupInterfacesPage()
 void kiptablesgenerator::setupIConntrackPage()
 {
   iConntrackPage = new QFrame(this);
-  QGridLayout *layout = new QGridLayout(iConntrackPage, 7, 4);
+  QGridLayout *layout = new QGridLayout(iConntrackPage, 8, 4);
   layout->setSpacing(KDialogBase::spacingHint());
   
   QLabel *intro = new QLabel(i18n( "<p><i>Advanced users only</i> - "
@@ -516,6 +524,8 @@ void kiptablesgenerator::setupIConntrackPage()
   connect(allSame, SIGNAL(toggled(bool )), icmpRelated, SLOT(setDisabled(bool )));
   
   allSame->setChecked(true);
+  
+  layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Ignored, QSizePolicy::Ignored));
   
   iConntrackPage->show();
   this->addPage(iConntrackPage, i18n("Connection Tracking"));
@@ -936,6 +946,8 @@ void kiptablesgenerator::setupIDefensiveChecksPage()
   layout->addWidget(checkSynFin);
   namedWidgets["iCheckSynFin"] = checkSynFin;
   
+  layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Ignored, QSizePolicy::Ignored));
+  
   iDefensiveChecksPage->show();
   this->addPage(iDefensiveChecksPage, i18n("Defensive Checks"));
 }
@@ -953,6 +965,8 @@ void kiptablesgenerator::setupFinishedPage()
   finishedLabel->show();
   
   layout->addWidget(finishedLabel);
+  
+  layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Ignored, QSizePolicy::Ignored));
   
   finishedPage->show();
   this->addPage(finishedPage, i18n("Finished"));
