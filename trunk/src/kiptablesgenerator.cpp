@@ -166,7 +166,7 @@ void kiptablesgenerator::setupFMasqueradingPage()
   
   KComboBox *extIfList = new KComboBox(fMasqueradingPage);
   for (unsigned int i = 1; if_indextoname(i, ifBuffer) != NULL; i++)
-		extIfList->insertItem((QString)ifBuffer);
+		if ((QString)ifBuffer != "lo") extIfList->insertItem((QString)ifBuffer);
   extIfList->show();
   layout->addMultiCellWidget(extIfList, 3, 3, 0, 1);
   namedWidgets["masqueradeExtIf"] = extIfList;
@@ -179,7 +179,7 @@ void kiptablesgenerator::setupFMasqueradingPage()
   
   KListBox *intIfList = new KListBox(fMasqueradingPage);
   for (unsigned int i = 1; if_indextoname(i, ifBuffer) != NULL; i++)
-  	intIfList->insertItem((QString)ifBuffer);
+  	if((QString)ifBuffer != "lo") intIfList->insertItem((QString)ifBuffer);
   intIfList->show();
   layout->addMultiCellWidget(intIfList, 5, 5, 0, 1);
   namedWidgets["masqueradeIntIfs"] = intIfList;
@@ -371,8 +371,7 @@ void kiptablesgenerator::setupInterfacesPage()
   layout->setSpacing(KDialogBase::spacingHint());
   
   QLabel *intro = new QLabel(i18n(
-    "<p>Which of the following interfaces do you want to filter?</p>"
-    "<p>It is strongly advised <b>not</b> to filter '<tt>lo</tt>'.</p>"), interfacesPage);
+    "<p>Which of the following interfaces do you want to filter?</p>"), interfacesPage);
   intro->show();
   layout->addWidget(intro);
   
@@ -380,14 +379,11 @@ void kiptablesgenerator::setupInterfacesPage()
 
   char buffer[IFNAMSIZ];
   for(unsigned int i = 1; if_indextoname(i, buffer) != NULL; i++)
-  {
-          interfaces->insertItem((QString)buffer);
-  }
+  	if ((QString)buffer != "lo") interfaces->insertItem((QString)buffer);
   
   interfaces->setSelectionMode(QListBox::Multi);
   for (unsigned short i = 0; i < interfaces->count(); i++)
-    if (interfaces->item(i)->text() != "lo")
-      interfaces->setSelected(i, true);
+    interfaces->setSelected(i, true);
   interfaces->show();
   layout->addWidget(interfaces);
   namedWidgets["iInterfaces"] = interfaces;
