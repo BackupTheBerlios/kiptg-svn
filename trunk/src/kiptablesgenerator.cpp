@@ -146,7 +146,6 @@ void kiptablesgenerator::setupFMasqueradingPage()
   optYesNo->hide();
   
   QRadioButton *optYes = new QRadioButton(i18n("&Yes"), fMasqueradingPage);
-  optYes->setChecked(true);
   optYes->show();
   layout->addWidget(optYes, 1, 0);
   namedWidgets["masqueradeBool"] = optYes;
@@ -154,6 +153,7 @@ void kiptablesgenerator::setupFMasqueradingPage()
   optYesNo->insert(optYes);
   
   QRadioButton *optNo = new QRadioButton(i18n("&No"), fMasqueradingPage);
+  optNo->setChecked(true); // people will know if they want this on, secure defaults
   optNo->show();
   layout->addWidget(optNo, 1, 1);
   optYesNo->insert(optNo);
@@ -931,7 +931,7 @@ void kiptablesgenerator::setupIDefensiveChecksPage()
   summary->show();
   layout->addWidget(summary);
   
-  QCheckBox *localSpoof = new QCheckBox(i18n("&Block spoofed local packets"), iDefensiveChecksPage);
+  QCheckBox *localSpoof = new QCheckBox(i18n("&Block spoofed packets"), iDefensiveChecksPage);
   localSpoof->setChecked(true);
   localSpoof->show();
   layout->addWidget(localSpoof);
@@ -1078,7 +1078,16 @@ void kiptablesgenerator::accept()
     }    
  
     if (((QCheckBox *) namedWidgets["iCheckLocalSpoof"])->isChecked())
-      rulesList += "$IPTABLES -A INPUT ! -i lo -d 127.0.0.0/8 -j DROP\n";
+    {
+      rulesList += "$IPTABLES -A INPUT ! -i lo -d 127.0.0.0/8 -j DROP\n"
+      	"for i in /proc/sys/net/ipv4/conf/*/rp_filter; do\n"
+        "\techo 1 > $i;\n"
+      	"done\n";
+      undoList +=
+      	"for i in /proc/sys/net/ipv4/conf/*/rp_filter; do\n"
+        "\t echo 0 > $i; \n"
+        "done\n";
+    }
     if (((QCheckBox *) namedWidgets["iSynFloodProtect"])->isChecked())
     {
       rulesList += "$IPTABLES -N Flood-Scan\n";
