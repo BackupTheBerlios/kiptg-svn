@@ -30,6 +30,7 @@
 #include <qlayout.h>
 #include <qradiobutton.h>
 
+#include <kactivelabel.h>
 #include <kcombobox.h>
 #include <kinputdialog.h>
 #include <klineedit.h>
@@ -69,10 +70,11 @@ void kiptablesgenerator::setupIHostsPage()
   QGridLayout *layout = new QGridLayout(iHostsPage, 4, 2);
   layout->setSpacing(KDialogBase::spacingHint());
   
-  QLabel *label = new QLabel(i18n(
+  KActiveLabel *label = new KActiveLabel(i18n(
     "<p><i>Advanced users only</i> - If you wish to allow or block any specific hosts, "
     "ignoring all other rules, add them to this page.</p>"),
     iHostsPage);
+  label->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   label->show();
   layout->addMultiCellWidget(label, 0, 0, 0, 1);
   
@@ -80,18 +82,23 @@ void kiptablesgenerator::setupIHostsPage()
   hosts->addColumn(i18n("Allow/Block"));
   hosts->addColumn(i18n("MAC/IP"));
   hosts->addColumn(i18n("Host"));
+  hosts->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Ignored);
   hosts->show();
   namedWidgets["hostsList"] = hosts;
   layout->addMultiCellWidget(hosts, 1, 3, 0, 0);
   
   KPushButton *addHost = new KPushButton(i18n("Add..."), iHostsPage);
+  addHost->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   addHost->show();
   layout->addWidget(addHost, 1, 1);
   connect( addHost, SIGNAL(clicked()), this, SLOT(slotShowHostDialog()));
   
   KPushButton *delHost = new KPushButton(i18n("Remove"), iHostsPage);
+  delHost->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   layout->addWidget(delHost, 2, 1);
   connect( delHost, SIGNAL(clicked()), this, SLOT(slotDelHost()));
+  
+  layout->addItem(new QSpacerItem(QSizePolicy::Minimum, QSizePolicy::Ignored), 3, 1);
   
   this->addPage(iHostsPage, i18n("Host Control"));
 }
@@ -136,7 +143,7 @@ void kiptablesgenerator::setupFMasqueradingPage()
 	QGridLayout *layout = new QGridLayout(fMasqueradingPage, 6,2);
 	layout->setSpacing(KDialogBase::spacingHint());
 	
-	QLabel *label = new QLabel(i18n("<p>Do you wish to setup masquerading?</p>"
+	KActiveLabel *label = new KActiveLabel(i18n("<p>Do you wish to setup masquerading?</p>"
 		"<p><i>Note: Some operating systems "
 		"call masquerading 'internet connection sharing'.</i></p>"), fMasqueradingPage);
   label->show();
@@ -158,7 +165,7 @@ void kiptablesgenerator::setupFMasqueradingPage()
   layout->addWidget(optNo, 1, 1);
   optYesNo->insert(optNo);
   
-  label = new QLabel(i18n("<p>Please select your external interface; this generally means the interface for your internet connection.</p>"),
+  label = new KActiveLabel(i18n("<p>Please select your external interface; this generally means the interface for your internet connection.</p>"),
   	fMasqueradingPage);
   label->show();
   layout->addMultiCellWidget(label, 2, 2, 0, 1);
@@ -171,7 +178,7 @@ void kiptablesgenerator::setupFMasqueradingPage()
   layout->addMultiCellWidget(extIfList, 3, 3, 0, 1);
   namedWidgets["masqueradeExtIf"] = extIfList;
   
-	label = new QLabel(i18n("<p>Please select the interfaces which should have access to the external interface.</p>"),
+	label = new KActiveLabel(i18n("<p>Please select the interfaces which should have access to the external interface.</p>"),
 		fMasqueradingPage);
   label->show();
   layout->addMultiCellWidget(label, 4, 4, 0, 1);
@@ -198,7 +205,7 @@ void kiptablesgenerator::setupWelcomePage()
   QVBoxLayout *layout = new QVBoxLayout(welcomePage);
   layout->setSpacing(KDialogBase::spacingHint());
 
-  QLabel *label = new QLabel(i18n(
+  KActiveLabel *label = new KActiveLabel(i18n(
     "<p>Welcome to KIptablesGenerator.</p>"
     "<p>This wizard will help you create your firewall rules.</p>"
     "<p><i>Troubleshooting:</i> The generated script requires "
@@ -589,7 +596,7 @@ void kiptablesgenerator::setupNewHostDialog()
   QGridLayout *layout = new QGridLayout(dialogArea, 5, 2);
   layout->setSpacing(KDialogBase::spacingHint());
   
-  QLabel *intro = new QLabel(i18n(
+  KActiveLabel *intro = new KActiveLabel(i18n(
     "<p>Here you can tell netfilter to allow all connections from a given host regardless of other rules, "
     "or block all connections from a given host regardless of other rules.</p>"
     "<p>You can specify a host either by IP address or MAC address.</p>"), dialogArea);
@@ -650,7 +657,7 @@ void kiptablesgenerator::setupNewForwardDialog()
   QGridLayout *layout = new QGridLayout(dialogArea, 4, 2);
   layout->setSpacing(KDialogBase::spacingHint());
   
-  QLabel *intro = new QLabel(i18n(
+  KActiveLabel *intro = new KActiveLabel(i18n(
       "<p><i>Advanced users only</i></p>"
       "<p>Here you can tell netfilter to forward connections to given ports to another address/port.</p>"
       "<p>This is using netfilter's DNAT functionality - incoming redirects go in the prerouting chain,"
@@ -721,7 +728,7 @@ void kiptablesgenerator::setupNewServiceDialog()
   QGridLayout *layout = new QGridLayout(dialogArea, 7, 2);
   layout->setSpacing(KDialogBase::spacingHint());
   
-  QLabel *intro = new QLabel(i18n(
+  KActiveLabel *intro = new KActiveLabel(i18n(
     "<p><i>Advanced users only</i></p>"
     "<p>Here you can allow or deny access to services through your firewall.<br />"
     "You can specify a port range in the box using this format: <tt>fromPort:toPort</tt>, "
@@ -921,7 +928,7 @@ void kiptablesgenerator::setupIDefensiveChecksPage()
   QVBoxLayout *layout = new QVBoxLayout(iDefensiveChecksPage);
   layout->setSpacing(KDialogBase::spacingHint());
   
-  QLabel *summary = new QLabel(i18n(
+  KActiveLabel *summary = new KActiveLabel(i18n(
     "<p>This page allows you to enable additional checks to help protect your system "
     "from common firewall evasion techniques, DOS attacks, and other malicious activities.</p>"
     "<p>If you don't understand the above, the defaults provided are suitable for most systems.</p>"),
@@ -983,7 +990,7 @@ void kiptablesgenerator::setupFinishedPage()
   
   QVBoxLayout *layout = new QVBoxLayout(finishedPage);
   
-  QLabel *finishedLabel = new QLabel(i18n(
+  KActiveLabel *finishedLabel = new KActiveLabel(i18n(
     "<p><b>Congratulations!</b></p>"
     "<p>All the information required to create your firewall rules has been collected. "
     "Please finish the wizard to generate your firewall script.</p>"), finishedPage);
