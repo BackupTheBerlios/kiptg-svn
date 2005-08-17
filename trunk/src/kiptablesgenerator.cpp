@@ -593,32 +593,20 @@ void kiptablesgenerator::setupNewHostDialog()
   newHostDialog = new KDialogBase(this, 0, true, i18n("Add Host"), KDialogBase::Ok | KDialogBase::Cancel);
   
   QFrame *dialogArea = new QFrame(newHostDialog);
-  QGridLayout *layout = new QGridLayout(dialogArea, 5, 2);
+  QGridLayout *layout = new QGridLayout(dialogArea, 7, 2);
   layout->setSpacing(KDialogBase::spacingHint());
   
   KActiveLabel *intro = new KActiveLabel(i18n(
     "<p>Here you can tell netfilter to allow all connections from a given host regardless of other rules, "
-    "or block all connections from a given host regardless of other rules.</p>"
-    "<p>You can specify a host either by IP address or MAC address.</p>"), dialogArea);
+    "or block all connections from a given host regardless of other rules.</p>"), dialogArea);
   intro->show();
   layout->addMultiCellWidget(intro, 0, 0, 0, 1);
 
-  QButtonGroup *whitelistOrBlacklist = new QButtonGroup(dialogArea);
-  whitelistOrBlacklist->hide();
-  
-  QRadioButton *whitelist = new QRadioButton(i18n("&Allow"), dialogArea);
-  whitelist->setChecked(true);
-  whitelist->show();
-  layout->addWidget(whitelist, 1, 0);
-  namedWidgets["newHost_allow"] = whitelist;
-  whitelistOrBlacklist->insert(whitelist);
-  
-  QRadioButton *blacklist = new QRadioButton(i18n("&Block"), dialogArea);
-  blacklist->setChecked(false);
-  blacklist->show();
-  layout->addWidget(blacklist, 1, 1);
-  whitelistOrBlacklist->insert(blacklist);
-  
+	QLabel *label = new QLabel(i18n(
+		"<p>Do you wish to specify the host by IP address or MAC (hardware) address?</p>"), dialogArea);
+  label->show();
+  layout->addMultiCellWidget(label, 1, 1, 0, 1);
+
   QButtonGroup *ipOrMAC = new QButtonGroup(dialogArea);
   ipOrMAC->hide();
   
@@ -634,14 +622,35 @@ void kiptablesgenerator::setupNewHostDialog()
   layout->addWidget(useMAC, 2, 1);
   ipOrMAC->insert(useMAC);
   
-  QLabel *hostLabel = new QLabel(i18n("Host:"), dialogArea);
+  label = new QLabel(i18n("<p>Do you want to allow connections from this host, or block them?</p>"), dialogArea);
+  label->show();
+  layout->addMultiCellWidget(label, 3, 3, 0, 1);
+
+  QButtonGroup *whitelistOrBlacklist = new QButtonGroup(dialogArea);
+  whitelistOrBlacklist->hide();
+  
+  QRadioButton *whitelist = new QRadioButton(i18n("&Allow"), dialogArea);
+  whitelist->setChecked(true);
+  whitelist->show();
+  layout->addWidget(whitelist, 4, 0);
+  namedWidgets["newHost_allow"] = whitelist;
+  whitelistOrBlacklist->insert(whitelist);
+  
+  QRadioButton *blacklist = new QRadioButton(i18n("&Block"), dialogArea);
+  blacklist->setChecked(false);
+  blacklist->show();
+  layout->addWidget(blacklist, 4, 1);
+  whitelistOrBlacklist->insert(blacklist);
+  
+ 
+  KActiveLabel *hostLabel = new KActiveLabel(i18n("Enter the IP or MAC address of the host:"), dialogArea);
   hostLabel->show();
-  layout->addMultiCellWidget(hostLabel, 3, 3, 0, 1);
+  layout->addMultiCellWidget(hostLabel, 5, 5, 0, 1);
   
   KLineEdit *host = new KLineEdit(dialogArea);
   host->show();
   namedWidgets["newHost_address"] = host;
-  layout->addMultiCellWidget(host, 4, 4, 0, 1);
+  layout->addMultiCellWidget(host, 6, 6, 0, 1);
   
   connect(newHostDialog, SIGNAL(okClicked()), this, SLOT(slotAddHost()));
   
