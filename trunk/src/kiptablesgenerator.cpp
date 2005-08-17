@@ -185,6 +185,8 @@ void kiptablesgenerator::setupFMasqueradingPage()
   namedWidgets["masqueradeIntIfs"] = intIfList;
   intIfList->setSelectionMode(QListBox::Multi);
   
+  slotMasqueradingEnabled(false);
+  
   fMasqueradingPage->show();
   this->addPage(fMasqueradingPage, i18n("Masquerading"));
 }
