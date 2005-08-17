@@ -178,6 +178,7 @@ void kiptablesgenerator::setupFMasqueradingPage()
   intIfList->show();
   layout->addMultiCellWidget(intIfList, 5, 5, 0, 1);
   namedWidgets["masqueradeIntIfs"] = intIfList;
+  intIfList->setSelectionMode(QListBox::Multi);
   
   fMasqueradingPage->show();
   this->addPage(fMasqueradingPage, i18n("Masquerading"));
@@ -1158,6 +1159,39 @@ void kiptablesgenerator::accept()
         : rulesList += QString("$IPTABLES -t nat -A OUTPUT -p tcp -m tcp --dport %1 -j DNAT --to %2\n").arg(localPort).arg(destination);
       forward = forward->nextSibling();
     }
+  }
+  
+  if ( ((QRadioButton*)namedWidgets["masqueradeBool"]) )
+  {
+  	KListBox *mIntIfs = ((KListBox*)namedWidgets["masqueradeIntIfs"]);
+    QStringList qslIntIfs;
+    
+    for (unsigned int i = 0; i < mIntIfs->count(); i++)
+    	if ( mIntIfs->isSelected(i) )
+    		qslIntIfs.append(mIntIfs->item(i)->text());
+    	
+  	rulesList += QString(
+  		"# Masquerading (aka 'internet connection sharing')\n"
+    	"# external interface (connected to the internet)\n"
+    	"EXT_IF=\"%1\"\n"
+    	"# internal interfaces (connected to your local network)\n"
+      "INT_IFS=\"%2\"\n"
+      "# Don't just allow everything into the internal network\n"
+      "$IPTABLES -F FORWARD\n"
+      "$IPTABLES -P FORWARD DROP\n"
+      "for INT_IF in $INT_IFS; do\n"
+      "\t$IPTABLES -A FORWARD -i $INT_IF -o $EXT_IF -j ACCEPT\n"
+      "\t$IPTABLES -A FORWARD -i $EXT_IF -o $INT_IF -m state --state ESTABLISHED,RELATED -j ACCEPT\n"
+      "done\n"
+      "$IPTABLES -t nat -F POSTROUTING\n"
+      "$IPTABLES -t nat -A POSTROUTING -o $EXT_IF -j MASQUERADE\n"
+      "# Enable IP packet forwarding\n"
+      "echo 1 > /proc/sys/net/ipv4/ip_forward\n").arg(
+      	((KComboBox*)namedWidgets["masqueradeExtIf"])->currentText()).arg(
+      	qslIntIfs.join(" ") );
+    undoList += QString(
+    	"$IPTABLES -t nat -F POSTROUTING\n"
+    	"echo 0 > /proc/sys/net/ipv4/ip_forward\n");
   }
  
   this->hide();
