@@ -1,8 +1,0 @@
-Requirements for generated script to run correctly:
-	root access
-	iptables
-	netfilter
-		conntrack module
-		tcp module
-		udp module
-		icmp module
