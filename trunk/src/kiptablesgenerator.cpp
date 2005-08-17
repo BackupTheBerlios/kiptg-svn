@@ -847,7 +847,10 @@ void kiptablesgenerator::slotShowForwardDialog()
 
 void kiptablesgenerator::slotMasqueradingEnabled(bool isEnabled)
 {
-	//TODO
+	namedWidgets["masqueradeLabel1"]->setEnabled(isEnabled);
+	namedWidgets["masqueradeLabel2"]->setEnabled(isEnabled);
+	namedWidgets["masqueradeIntIfs"]->setEnabled(isEnabled);
+	namedWidgets["masqueradeExtIf"]->setEnabled(isEnabled);
 }
 
 void kiptablesgenerator::slotAddForward()
