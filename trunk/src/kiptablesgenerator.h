@@ -79,6 +79,10 @@ private:
   void setupFinishedPage();
   
 public:
+	enum os {
+		KIPTG_LINUX,
+		KIPTG_BSD
+  };
   enum distros {
     KIPTG_SLACKWARE,
     KIPTG_GENTOO

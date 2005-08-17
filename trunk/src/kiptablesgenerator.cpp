@@ -99,6 +99,7 @@ void kiptablesgenerator::setupIHostsPage()
   connect( delHost, SIGNAL(clicked()), this, SLOT(slotDelHost()));
   
   layout->addItem(new QSpacerItem(QSizePolicy::Minimum, QSizePolicy::Ignored), 3, 1);
+  layout->setColStretch(0, 1);
   
   this->addPage(iHostsPage, i18n("Host Control"));
 }
@@ -583,6 +584,8 @@ void kiptablesgenerator::setupIPortsPage()
   downService->show();
   layout->addWidget(downService, 4, 1);
   connect(downService, SIGNAL(clicked()), this, SLOT(slotDownService()));
+  
+  layout->setColStretch(0, 1);
   
   iPortsPage->show();
   this->addPage(iPortsPage, i18n("Incoming Ports"));
