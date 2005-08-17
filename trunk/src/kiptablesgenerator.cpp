@@ -321,7 +321,6 @@ void kiptablesgenerator::setupIncomingPage()
   layout->addMultiCellWidget(intro, 0, 0, 0, 1);
   
   QButtonGroup *optYesNo = new QButtonGroup(incomingPage);
-  namedWidgets["incomingYesNo"] = optYesNo;
   optYesNo->hide();
   
   QRadioButton *optYes = new QRadioButton(i18n("&Yes"), incomingPage);
@@ -329,6 +328,7 @@ void kiptablesgenerator::setupIncomingPage()
   optYes->setName("yes");
   optYes->show();
   layout->addWidget(optYes, 1, 0);
+  namedWidgets["incomingBool"] = optYes;
   optYesNo->insert(optYes);
   
   QRadioButton *optNo = new QRadioButton(i18n("N&o"), incomingPage);
@@ -1076,7 +1076,7 @@ void kiptablesgenerator::slotDelHost()
 void kiptablesgenerator::accept()
 {
   QString rulesList, undoList;
-  if (((QButtonGroup*) namedWidgets["incomingYesNo"])->selected()->name() == (QString) "yes")
+  if (((QCheckBox*) namedWidgets["incomingBool"])->isChecked())
   {
     if ( ((KComboBox*) namedWidgets["incomingPolicy"])->currentItem() == 0)
       rulesList += "$IPTABLES -P INPUT ACCEPT\n";
