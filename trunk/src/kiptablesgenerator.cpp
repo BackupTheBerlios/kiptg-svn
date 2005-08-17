@@ -190,7 +190,7 @@ void kiptablesgenerator::makeScript(QString &rulesList, QString &undoList, int d
       output = "#!/bin/sh\n" + copyrightText + "IPTABLES=/usr/sbin/iptables\n\n"
         "function start() {\n" + rulesList +
         "}\n"
-        "function stop() {\n"
+        "function stop() {\n" + undoList +
         "$IPTABLES -P INPUT ACCEPT\n"
         "$IPTABLES -P FORWARD ACCEPT\n"
         "$IPTABLES -P OUTPUT ACCEPT\n"
