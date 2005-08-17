@@ -55,6 +55,7 @@ private:
   QFrame *iConntrackPage;
   QFrame *iPortsPage;
   QFrame *fForwardingPage;
+  QFrame *fMasqueradingPage;
   QFrame *iDefensiveChecksPage;
   QFrame *finishedPage;
 
@@ -74,6 +75,7 @@ private:
   void setupIPortsPage();
   void setupIDefensiveChecksPage();
   void setupFForwardingPage();
+  void setupFMasqueradingPage();
   void setupFinishedPage();
   
 public:
@@ -101,6 +103,7 @@ protected slots:
   void slotAddHost();
   void slotDelHost();
   void slotShownRules();
+  void slotMasqueradingEnabled(bool);
   virtual void accept();
 };
 

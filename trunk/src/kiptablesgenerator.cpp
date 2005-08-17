@@ -56,6 +56,7 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
   setupIPortsPage();
   setupIHostsPage();
   setupFForwardingPage();
+  setupFMasqueradingPage();
   setupIDefensiveChecksPage();
   setupFinishedPage();
   helpButton()->hide();
@@ -125,6 +126,61 @@ void kiptablesgenerator::setupFForwardingPage()
   connect( delForward, SIGNAL(clicked()), this, SLOT(slotDelForward()));
   
   this->addPage(fForwardingPage, i18n("Port Forwarding"));
+}
+
+void kiptablesgenerator::setupFMasqueradingPage()
+{
+  char ifBuffer[IFNAMSIZ];
+	fMasqueradingPage = new QFrame(this);
+	
+	QGridLayout *layout = new QGridLayout(fMasqueradingPage, 6,2);
+	layout->setSpacing(KDialogBase::spacingHint());
+	
+	QLabel *label = new QLabel(i18n("<p>Do you wish to setup masquerading?</p>"
+		"<p><i>Note: Some operating systems "
+		"call masquerading 'internet connection sharing'.</i></p>"), fMasqueradingPage);
+  label->show();
+  layout->addMultiCellWidget(label, 0, 0, 0, 1);
+  
+  QRadioButton *optYes = new QRadioButton(i18n("&Yes"), fMasqueradingPage);
+  optYes->setChecked(true);
+  optYes->show();
+  layout->addWidget(optYes, 1, 0);
+  namedWidgets["masqueradeBool"] = optYes;
+  connect(optYes, SIGNAL(toggled(bool )), this, SLOT(slotMasqueradingEnabled(bool)));
+  
+  QRadioButton *optNo = new QRadioButton(i18n("&No"), fMasqueradingPage);
+  optNo->show();
+  layout->addWidget(optNo, 1, 1);
+  
+  label = new QLabel(i18n("<p>Please select your external interface; this generally means the interface for your internet connection.</p>"),
+  	fMasqueradingPage);
+  label->show();
+  layout->addMultiCellWidget(label, 2, 2, 0, 1);
+  namedWidgets["masqueradeLabel1"] = label;
+  
+  KComboBox *extIfList = new KComboBox(fMasqueradingPage);
+  for (unsigned int i = 1; if_indextoname(i, ifBuffer) != NULL; i++)
+		extIfList->insertItem((QString)ifBuffer);
+  extIfList->show();
+  layout->addMultiCellWidget(extIfList, 3, 3, 0, 1);
+  namedWidgets["masqueradeExtIf"] = extIfList;
+  
+	label = new QLabel(i18n("<p>Please select the interfaces which should have access to the external interface.</p>"),
+		fMasqueradingPage);
+  label->show();
+  layout->addMultiCellWidget(label, 4, 4, 0, 1);
+  namedWidgets["masqueradeLabel2"] = label;
+  
+  KListBox *intIfList = new KListBox(fMasqueradingPage);
+  for (unsigned int i = 1; if_indextoname(i, ifBuffer) != NULL; i++)
+  	intIfList->insertItem((QString)ifBuffer);
+  intIfList->show();
+  layout->addMultiCellWidget(intIfList, 5, 5, 0, 1);
+  namedWidgets["masqueradeIntIfs"] = intIfList;
+  
+  fMasqueradingPage->show();
+  this->addPage(fMasqueradingPage, i18n("Masquerading"));
 }
 
 void kiptablesgenerator::setupWelcomePage()
@@ -771,6 +827,11 @@ void kiptablesgenerator::slotShowForwardDialog()
   ((QRadioButton*) namedWidgets["forward_incoming"])->setChecked(true);
   
   newForwardDialog->show();
+}
+
+void kiptablesgenerator::slotMasqueradingEnabled(bool isEnabled)
+{
+	//TODO
 }
 
 void kiptablesgenerator::slotAddForward()
