@@ -188,9 +188,9 @@ void kiptablesgenerator::makeScript(QString &rulesList, QString &undoList, int d
   {
     case KIPTG_SLACKWARE:
       output = "#!/bin/sh\n" + copyrightText + "IPTABLES=/usr/sbin/iptables\n\n"
-        "start() {\n" + rulesList +
+        "function start() {\n" + rulesList +
         "}\n"
-        "stop() {\n"
+        "function stop() {\n"
         "$IPTABLES -P INPUT ACCEPT\n"
         "$IPTABLES -P FORWARD ACCEPT\n"
         "$IPTABLES -P OUTPUT ACCEPT\n"
