@@ -103,7 +103,7 @@ void kiptablesgenerator::setupFForwardingPage()
   layout->setSpacing(KDialogBase::spacingHint());
   
   QLabel *label = new QLabel(i18n(
-    "<p>If you wish to enable TCP forwardind for any ports (incoming or outgoing) add them to this page.</p>"),
+    "<p>If you wish to enable TCP forwarding for any ports (incoming or outgoing) add them to this page.</p>"),
     fForwardingPage);
   label->show();
   layout->addMultiCellWidget(label, 0, 0, 0, 1);
