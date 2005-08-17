@@ -955,6 +955,24 @@ void kiptablesgenerator::setupIDefensiveChecksPage()
   layout->addWidget(checkSynFin);
   namedWidgets["iCheckSynFin"] = checkSynFin;
   
+  QCheckBox *sysctlSmurf = new QCheckBox(i18n("&Ignore ICMP echo broadcasts (helps protect against smurf attacks)"), iDefensiveChecksPage);
+  sysctlSmurf->setChecked(true);
+  sysctlSmurf->show();
+  layout->addWidget(sysctlSmurf);
+  namedWidgets["sysctlSmurf"] = sysctlSmurf;
+  
+  QCheckBox *sysctlIgnoreRedirects = new QCheckBox(i18n("I&gnore ICMP redirects"), iDefensiveChecksPage);
+  sysctlIgnoreRedirects->setChecked(true);
+  sysctlIgnoreRedirects->show();
+  layout->addWidget(sysctlIgnoreRedirects);
+  namedWidgets["sysctlIgnoreRedirects"] = sysctlIgnoreRedirects;
+  
+  QCheckBox *sysctlIgnoreSourceRouted = new QCheckBox(i18n("Ig&nore packets that use IP source routing"), iDefensiveChecksPage);
+  sysctlIgnoreSourceRouted->setChecked(true);
+  sysctlIgnoreSourceRouted->show();
+  layout->addWidget(sysctlIgnoreSourceRouted);
+  namedWidgets["sysctlIgnoreSourceRouted"] = sysctlIgnoreSourceRouted;
+  
   layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Ignored, QSizePolicy::Ignored));
   
   iDefensiveChecksPage->show();
@@ -1095,6 +1113,37 @@ void kiptablesgenerator::accept()
       rulesList += "$IPTABLES -A Flood-Scan -m limit --limit 1/s --limit-burst 20 -j RETURN\n";
       rulesList += "$IPTABLES -A Flood-Scan -j DROP\n";
       undoList += "$IPTABLES -X Flood-Scan\n";
+    }
+    if (((QCheckBox *) namedWidgets["sysctlSmurf"])->isChecked())
+    {
+    	rulesList +=
+    		"# don't participate in smurf attacks\n"
+    		"echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_broadcasts\n";
+    	undoList += "echo 0 > /proc/sys/net/ipv4/icmp_echo_ignore_broadcasts\n";
+    }
+    if (((QCheckBox *) namedWidgets["sysctlIgnoreRedirects"])->isChecked())
+    {
+    	rulesList +=
+    		"# Ignore ICMP redirects\n"
+    		"for i in /proc/sys/net/ipv4/conf/*/accept_redirects ; do\n"
+    		"\techo 0 > $i;\n"
+    		"done\n";
+      undoList +=
+      	"for i in /proc/sys/net/ipv4/conf/*/accept_redirects ; do\n"
+        "\techo 1 > $i;\n"
+        "done\n";
+    }
+    if (((QCheckBox *) namedWidgets["sysctlIgnoreSourceRouted"])->isChecked())
+    {
+    	rulesList +=
+    		"# Ignore packets with source routing\n"
+    		"for i in /proc/sys/net/ipv4/conf/*/accept_source_route ; do\n"
+        "\techo 0 > $i;\n"
+        "done\n";
+      undoList +=
+      	"for i in /proc/sys/net/ipv4/conf/*/accept_source_route ; do\n"
+      	"\techo 1 > $i;\n"
+      	"done\n";
     }
     if (((QCheckBox *) namedWidgets["iCheckSyn"])->isChecked())
       rulesList += "$IPTABLES -A INPUT -p tcp -m tcp ! --syn -m conntrack --ctstate NEW -j DROP\n";
