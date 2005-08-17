@@ -179,7 +179,7 @@ void kiptablesgenerator::makeScript(QString &rulesList, QString &undoList, int d
   QString output, copyrightText =
     "# Copyright (c) 2004-2005 Frederick Emmott\n"
     "# Produced by KIptablesGenerator, please see\n"
-    "# http://fredemmott.co.uk/index.php?page=kitg - \n"
+    "# http://fredemmott.co.uk/index.php?page=kitg\n"
     "# This script is under the terms of the GNU\n"
     "# General Public License, Version 2, or at your\n"
     "# option, any later version.\n";
@@ -187,7 +187,26 @@ void kiptablesgenerator::makeScript(QString &rulesList, QString &undoList, int d
   switch (distro)
   {
     case KIPTG_SLACKWARE:
-      output = "#!/bin/sh\n" + copyrightText + "IPTABLES=/usr/sbin/iptables\n\n" + rulesList;
+      output = "#!/bin/sh\n" + copyrightText + "IPTABLES=/usr/sbin/iptables\n\n"
+        "start() {\n" + rulesList +
+        "}\n"
+        "stop() {\n"
+        "$IPTABLES -P INPUT ACCEPT\n"
+        "$IPTABLES -P FORWARD ACCEPT\n"
+        "$IPTABLES -P OUTPUT ACCEPT\n"
+        "$IPTABLES -F\n"
+        "}\n"
+        "case $1 in\n"
+        "\tstop)\n"
+        "\t\tstop;\n"
+        "\t\t;;\n"
+        "\trestart)\n"
+        "\t\tstop;\n"
+        "\t\tstart;\n"
+        "\t\t;;\n"
+        "\t*)\n"
+        "\t\tstart;\n"
+        "esac";
       break;
     case KIPTG_GENTOO:
       output = "#!/sbin/runscript\n" + copyrightText + 
@@ -197,8 +216,9 @@ void kiptablesgenerator::makeScript(QString &rulesList, QString &undoList, int d
         "eend 0\n}\n\n"
         "stop() {\n"
         "ebegin \"Stopping firewall\"\n" + undoList +
-        "$IPTABLES -t nat -F\n"
         "$IPTABLES -P INPUT ACCEPT\n"
+        "$IPTABLES -P OUTPUT ACCEPT\n"
+        "$IPTABLES -P FORWARD ACCEPT\n"
         "$IPTABLES -F\n"
         "eend 0\n"
         "}";
@@ -604,7 +624,7 @@ void kiptablesgenerator::setupNewForwardDialog()
  
 
   connect(newForwardDialog, SIGNAL(okClicked()), this, SLOT(slotAddForward()));
-	
+  
   dialogArea->show();
   newForwardDialog->setMainWidget(dialogArea);
 }
