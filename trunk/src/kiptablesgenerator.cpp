@@ -142,16 +142,21 @@ void kiptablesgenerator::setupFMasqueradingPage()
   label->show();
   layout->addMultiCellWidget(label, 0, 0, 0, 1);
   
+  QButtonGroup *optYesNo = new QButtonGroup(fMasqueradingPage);
+  optYesNo->hide();
+  
   QRadioButton *optYes = new QRadioButton(i18n("&Yes"), fMasqueradingPage);
   optYes->setChecked(true);
   optYes->show();
   layout->addWidget(optYes, 1, 0);
   namedWidgets["masqueradeBool"] = optYes;
   connect(optYes, SIGNAL(toggled(bool )), this, SLOT(slotMasqueradingEnabled(bool)));
+  optYesNo->insert(optYes);
   
   QRadioButton *optNo = new QRadioButton(i18n("&No"), fMasqueradingPage);
   optNo->show();
   layout->addWidget(optNo, 1, 1);
+  optYesNo->insert(optNo);
   
   label = new QLabel(i18n("<p>Please select your external interface; this generally means the interface for your internet connection.</p>"),
   	fMasqueradingPage);
