@@ -41,7 +41,7 @@ private:
   QStringList mRules;
   QMap<QString, QWidget*> namedWidgets;
   QMap<QString, unsigned int> namesToPorts;
-
+  
   KDialogBase *newServiceDialog;
   KDialogBase *newForwardDialog;
   KDialogBase *newHostDialog;

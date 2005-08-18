@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2005 by Fred Emmott                                     *
+ *   Copyright (C) 2004-2005 by Fred Emmott                                *
  *   mail@fredemmott.co.uk                                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -50,8 +50,10 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
   setupWelcomePage();
   setupDistroPage();
   setupInterfacesPage();
+/*
   setupIncomingPage();
   setAppropriate(incomingPage, false); // don't show this page
+*/ // why bother setting it up if we're not going to bother using it?
   setupIPolicyPage();
   setupIConntrackPage();
   setupIPortsPage();
