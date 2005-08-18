@@ -88,8 +88,10 @@ private:
   
 public:
   enum distros {
+  	KIPTG_GENERIC_LINUX,
     KIPTG_SLACKWARE,
     KIPTG_GENTOO,
+    KIPTG_GENERIC_BSD,
     KIPTG_FREEBSD,
     KIPTG_NETBSD,
     KIPTG_OPENBSD

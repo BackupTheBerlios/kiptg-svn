@@ -114,12 +114,15 @@ void kiptablesgenerator::slotDistroChanged(int distro)
 {
 	switch (distro)
 	{
-		case KIPTG_SLACKWARE: // Linux
+		case KIPTG_GENERIC_LINUX:
+		case KIPTG_SLACKWARE:
 		case KIPTG_GENTOO:
 			if ( currentOS == KIPTG_LINUX )
 				return;
       for ( unsigned int i = 0; i < linuxOnlyPages.count(); i++)
       	setAppropriate(linuxOnlyPages.at(i), true);
+      for ( unsigned int i = 0; i < linuxOnlyWidgets.count(); i++)
+      	linuxOnlyWidgets.at(i)->setEnabled(true);
       currentOS = KIPTG_LINUX;
 			break;
     default: // BSD
@@ -127,6 +130,8 @@ void kiptablesgenerator::slotDistroChanged(int distro)
     		return;
       for ( unsigned int i = 0; i < linuxOnlyPages.count(); i++)
       	setAppropriate(linuxOnlyPages.at(i), false);
+      for ( unsigned int i = 0; i < linuxOnlyWidgets.count(); i++)
+      	linuxOnlyWidgets.at(i)->setEnabled(false);
       currentOS = KIPTG_BSD;
     	break;
 	}
@@ -263,9 +268,11 @@ void kiptablesgenerator::setupDistroPage()
   layout->addWidget(label);
   
   KComboBox *distroList = new KComboBox(distroPage);
+  distroList->insertItem(i18n("Generic Linux"), KIPTG_GENERIC_LINUX);
   distroList->insertItem(i18n("Slackware"), KIPTG_SLACKWARE);
   distroList->insertItem(i18n("Gentoo"), KIPTG_GENTOO);
-  distroList->insertItem(i18n("FreeBSD"), KIPTG_FREEBSD); // FIXME: these still use iptables
+  distroList->insertItem(i18n("Generic BSD"), KIPTG_GENERIC_BSD); // FIXME: these are unimplemented
+  distroList->insertItem(i18n("FreeBSD"), KIPTG_FREEBSD);
   distroList->insertItem(i18n("NetBSD"), KIPTG_NETBSD);
   distroList->insertItem(i18n("OpenBSD"), KIPTG_OPENBSD);
   distroList->show();
@@ -274,7 +281,8 @@ void kiptablesgenerator::setupDistroPage()
   connect( distroList, SIGNAL(activated(int)), this, SLOT(slotDistroChanged(int)));
   
   label = new QLabel(i18n(
-  	"<p><i>Note: If your distribution isn't listed, the Slackware script should work on any distribution.</i></p>"), distroPage);
+  	"<p><i>Note: If your distribution isn't listed, the 'Generic Linux' or 'Generic BSD' "
+  	"options should work for you.</i></p>"), distroPage);
   label->show();
   layout->addWidget(label);
   
@@ -296,6 +304,9 @@ void kiptablesgenerator::makeScript(QString &rulesList, QString &undoList, int d
   
   switch (distro)
   {
+  	case KIPTG_GENERIC_LINUX:
+  		output = "#!/bin/sh\n" + copyrightText + "IPTABLES=/usr/sbin/iptables\n\n" + rulesList;
+  		break;
     case KIPTG_SLACKWARE:
       output = "#!/bin/sh\n" + copyrightText + "IPTABLES=/usr/sbin/iptables\n\n"
         "function start() {\n" + rulesList +
