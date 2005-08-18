@@ -22,6 +22,7 @@
 
 #include <qframe.h>
 #include <qmap.h>
+#include <qptrlist.h>
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qwidget.h>
@@ -38,6 +39,13 @@ class kiptablesgenerator : public KWizard
 {
 Q_OBJECT
 private:
+	enum os {
+		KIPTG_LINUX,
+		KIPTG_BSD
+  };
+  
+  os currentOS;
+  
   QStringList mRules;
   QMap<QString, QWidget*> namedWidgets;
   QMap<QString, unsigned int> namesToPorts;
@@ -79,18 +87,20 @@ private:
   void setupFinishedPage();
   
 public:
-	enum os {
-		KIPTG_LINUX,
-		KIPTG_BSD
-  };
   enum distros {
     KIPTG_SLACKWARE,
-    KIPTG_GENTOO
+    KIPTG_GENTOO,
+    KIPTG_FREEBSD,
+    KIPTG_NETBSD,
+    KIPTG_OPENBSD
   };
   kiptablesgenerator(QWidget *parent = 0, const char *name = 0);
 
   ~kiptablesgenerator();
   void makeScript(QString &rulesList, QString &undoList, int distro);
+protected:
+	QPtrList<QWidget> linuxOnlyWidgets;
+	QPtrList<QFrame> linuxOnlyPages;
 protected slots:
   void slotNewInterface();
   void slotChangedProtocol(int);
@@ -108,6 +118,7 @@ protected slots:
   void slotDelHost();
   void slotShownRules();
   void slotMasqueradingEnabled(bool);
+  void slotDistroChanged(int);
   virtual void accept();
 };
 

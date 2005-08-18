@@ -43,6 +43,8 @@
 kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
  : KWizard(parent, name)
 {
+	currentOS = KIPTG_LINUX;
+
   setupNewForwardDialog();
   setupNewServiceDialog();
   setupNewHostDialog();
@@ -50,10 +52,8 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
   setupWelcomePage();
   setupDistroPage();
   setupInterfacesPage();
-/*
   setupIncomingPage();
-  setAppropriate(incomingPage, false); // don't show this page
-*/ // why bother setting it up if we're not going to bother using it?
+  setAppropriate(incomingPage, false); // don't show this page, but set it up so accept() can reference it's settings
   setupIPolicyPage();
   setupIConntrackPage();
   setupIPortsPage();
@@ -63,6 +63,10 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
   setupIDefensiveChecksPage();
   setupFinishedPage();
   helpButton()->hide();
+  
+  linuxOnlyPages.append(iConntrackPage);
+  linuxOnlyPages.append(fMasqueradingPage);
+  linuxOnlyPages.append(iDefensiveChecksPage);
 }
 
 void kiptablesgenerator::setupIHostsPage()
@@ -104,6 +108,28 @@ void kiptablesgenerator::setupIHostsPage()
   layout->setColStretch(0, 1);
   
   this->addPage(iHostsPage, i18n("Host Control"));
+}
+
+void kiptablesgenerator::slotDistroChanged(int distro)
+{
+	switch (distro)
+	{
+		case KIPTG_SLACKWARE: // Linux
+		case KIPTG_GENTOO:
+			if ( currentOS == KIPTG_LINUX )
+				return;
+      for ( unsigned int i = 0; i < linuxOnlyPages.count(); i++)
+      	setAppropriate(linuxOnlyPages.at(i), true);
+      currentOS = KIPTG_LINUX;
+			break;
+    default: // BSD
+    	if ( currentOS == KIPTG_BSD )
+    		return;
+      for ( unsigned int i = 0; i < linuxOnlyPages.count(); i++)
+      	setAppropriate(linuxOnlyPages.at(i), false);
+      currentOS = KIPTG_BSD;
+    	break;
+	}
 }
 
 void kiptablesgenerator::setupFForwardingPage()
@@ -239,9 +265,13 @@ void kiptablesgenerator::setupDistroPage()
   KComboBox *distroList = new KComboBox(distroPage);
   distroList->insertItem(i18n("Slackware"), KIPTG_SLACKWARE);
   distroList->insertItem(i18n("Gentoo"), KIPTG_GENTOO);
+  distroList->insertItem(i18n("FreeBSD"), KIPTG_FREEBSD); // FIXME: these still use iptables
+  distroList->insertItem(i18n("NetBSD"), KIPTG_NETBSD);
+  distroList->insertItem(i18n("OpenBSD"), KIPTG_OPENBSD);
   distroList->show();
   layout->addWidget(distroList);
   namedWidgets["distro"] = distroList;
+  connect( distroList, SIGNAL(activated(int)), this, SLOT(slotDistroChanged(int)));
   
   label = new QLabel(i18n(
   	"<p><i>Note: If your distribution isn't listed, the Slackware script should work on any distribution.</i></p>"), distroPage);
