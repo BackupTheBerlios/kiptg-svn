@@ -63,10 +63,6 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
   setupIDefensiveChecksPage();
   setupFinishedPage();
   helpButton()->hide();
-  
-  linuxOnlyPages.append(iConntrackPage);
-  linuxOnlyPages.append(fMasqueradingPage);
-  linuxOnlyPages.append(iDefensiveChecksPage);
 }
 
 void kiptablesgenerator::setupIHostsPage()
@@ -1131,13 +1127,19 @@ void kiptablesgenerator::accept()
 
 void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
 {
+	QStringList sections;
+
   if (((QCheckBox*) namedWidgets["incomingBool"])->isChecked())
   {
+  	rulesList = "##### Set the incoming policy - this decides what happens with unmatches packets #####\n";
     if ( ((KComboBox*) namedWidgets["incomingPolicy"])->currentItem() == 0)
       rulesList += "$IPTABLES -P INPUT ACCEPT\n";
     else
       rulesList += "$IPTABLES -P INPUT DROP\n";
+    
+    sections.append(rulesList);
       
+    rulesList = "##### Interfaces whitelist #####\n";
     KListBox* interfaces = (KListBox*) namedWidgets["iInterfaces"];
     for (unsigned int i = 0; i < interfaces->count(); i++)
     {
@@ -1145,6 +1147,9 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
       if (! interface->isSelected())
           rulesList += QString("$IPTABLES -A INPUT -i %1 -j ACCEPT\n").arg(interface->text());
     }
+    sections.append(rulesList);
+    
+    rulesList = "##### Hosts whitelist #####\n";
     
     KListView* hosts = (KListView*) namedWidgets["hostsList"];
     QListViewItem* host = hosts->firstChild();
@@ -1162,19 +1167,14 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
         ? rulesList += QString("$IPTABLES -A INPUT -s %1 -j %2\n").arg(address).arg(action)
         : rulesList += QString("$IPTABLES -A INPUT -m mac --mac-source %1 -j %2\n").arg(address).arg(action);
       host = host->nextSibling();
-    }    
+    }
+    
+    sections.append(rulesList);
+    
+    rulesList = "##### Assorted defensive checks #####\n";
  
     if (((QCheckBox *) namedWidgets["iCheckLocalSpoof"])->isChecked())
-    {
-      rulesList += "$IPTABLES -A INPUT ! -i lo -d 127.0.0.0/8 -j DROP\n"
-      	"for i in /proc/sys/net/ipv4/conf/*/rp_filter; do\n"
-        "\techo 1 > $i;\n"
-      	"done\n";
-      undoList +=
-      	"for i in /proc/sys/net/ipv4/conf/*/rp_filter; do\n"
-        "\t echo 0 > $i; \n"
-        "done\n";
-    }
+      rulesList += "$IPTABLES -A INPUT ! -i lo -d 127.0.0.0/8 -j DROP\n";
     if (((QCheckBox *) namedWidgets["iSynFloodProtect"])->isChecked())
     {
       rulesList += "$IPTABLES -N Flood-Scan\n";
@@ -1183,6 +1183,26 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
       rulesList += "$IPTABLES -A Flood-Scan -j DROP\n";
       undoList += "$IPTABLES -X Flood-Scan\n";
     }
+    if (((QCheckBox *) namedWidgets["iCheckSyn"])->isChecked())
+      rulesList += "$IPTABLES -A INPUT -p tcp -m tcp ! --syn -m conntrack --ctstate NEW -j DROP\n";
+    if (((QCheckBox *) namedWidgets["iCheckSynFin"])->isChecked())
+      rulesList += "$IPTABLES -A INPUT -p tcp -m tcp --tcp-flags SYN,FIN SYN,FIN -j DROP\n";
+      
+  	sections.append(rulesList);
+  	
+  	rulesList = "##### sysctl-based defenses #####\n";
+  	
+  	if (((QCheckBox *) namedWidgets["iCheckLocalSpoof"])->isChecked())
+  	{
+    	rulesList += "# Help protect against spoofing\n"
+    		"for i in /proc/sys/net/ipv4/conf/*/rp_filter; do\n"
+        "\techo 1 > $i;\n"
+      	"done\n";
+      undoList +=
+      	"for i in /proc/sys/net/ipv4/conf/*/rp_filter; do\n"
+        "\t echo 0 > $i; \n"
+        "done\n";
+  	}
     if (((QCheckBox *) namedWidgets["sysctlSmurf"])->isChecked())
     {
     	rulesList +=
@@ -1214,11 +1234,11 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
       	"\techo 1 > $i;\n"
       	"done\n";
     }
-    if (((QCheckBox *) namedWidgets["iCheckSyn"])->isChecked())
-      rulesList += "$IPTABLES -A INPUT -p tcp -m tcp ! --syn -m conntrack --ctstate NEW -j DROP\n";
-    if (((QCheckBox *) namedWidgets["iCheckSynFin"])->isChecked())
-      rulesList += "$IPTABLES -A INPUT -p tcp -m tcp --tcp-flags SYN,FIN SYN,FIN -j DROP\n";
-         
+    
+    sections.append(rulesList);
+    
+    rulesList = "##### Connection tracking rules #####\n";
+    
     if ( ((QCheckBox*) namedWidgets["iConntrackAllSame"])->isChecked() )
     {
       if ( ((QCheckBox*) namedWidgets["iConntrackAllEstablished"])->isChecked() )
@@ -1251,6 +1271,10 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
       if ( ((QCheckBox*) namedWidgets["iConntrackICMPNew"])->isChecked() )
         rulesList += "$IPTABLES -A INPUT -p icmp -m conntrack --ctstate NEW -j ACCEPT\n";
     }
+    
+    sections.append(rulesList);
+    
+    rulesList = "##### Rules to allow by ports and/or ICMP type #####\n";
 
     KListView* services = (KListView*) namedWidgets["iPorts"];
     QListViewItem* service = services->firstChild();
@@ -1280,6 +1304,10 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
         rulesList += QString("$IPTABLES -A INPUT -p icmp -m icmp --icmp-type %1 -j %2\n").arg(portName).arg(action);
       service = service->nextSibling();
     }
+    
+    sections.append(rulesList);
+    
+    rulesList = "##### Port forwarding #####\n";
 
     KListView* forwards = (KListView*) namedWidgets["forwardsList"];
     QListViewItem* forward = forwards->firstChild();
@@ -1296,8 +1324,11 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
     }
   }
   
-  if ( ((QRadioButton*)namedWidgets["masqueradeBool"]) )
+  sections.append(rulesList);
+  
+  if ( ((QRadioButton*)namedWidgets["masqueradeBool"])->isChecked() )
   {
+  	rulesList = "##### IP Masquerading (internet connection sharing) #####\n";
   	KListBox *mIntIfs = ((KListBox*)namedWidgets["masqueradeIntIfs"]);
     QStringList qslIntIfs;
     
@@ -1306,7 +1337,6 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
     		qslIntIfs.append(mIntIfs->item(i)->text());
     	
   	rulesList += QString(
-  		"# Masquerading (aka 'internet connection sharing')\n"
     	"# external interface (connected to the internet)\n"
     	"EXT_IF=\"%1\"\n"
     	"# internal interfaces (connected to your local network)\n"
@@ -1327,7 +1357,9 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
     undoList += QString(
     	"$IPTABLES -t nat -F POSTROUTING\n"
     	"echo 0 > /proc/sys/net/ipv4/ip_forward\n");
+    sections.append(rulesList);
   }
+  rulesList = sections.join("\n");
 }
 
 void kiptablesgenerator::slotShownRules()
