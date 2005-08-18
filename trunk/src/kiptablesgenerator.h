@@ -101,6 +101,7 @@ public:
 protected:
 	QPtrList<QWidget> linuxOnlyWidgets;
 	QPtrList<QFrame> linuxOnlyPages;
+	void linuxOutput(QString &rulesList, QString &undoList);
 protected slots:
   void slotNewInterface();
   void slotChangedProtocol(int);

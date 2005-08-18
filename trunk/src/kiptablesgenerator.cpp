@@ -1111,6 +1111,15 @@ void kiptablesgenerator::slotDelHost()
 void kiptablesgenerator::accept()
 {
   QString rulesList, undoList;
+
+	if ( currentOS == KIPTG_LINUX ) linuxOutput(rulesList, undoList);
+ 
+  this->hide();
+  makeScript(rulesList, undoList, ((KComboBox*) namedWidgets["distro"])->currentItem());
+}
+
+void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
+{
   if (((QCheckBox*) namedWidgets["incomingBool"])->isChecked())
   {
     if ( ((KComboBox*) namedWidgets["incomingPolicy"])->currentItem() == 0)
@@ -1308,10 +1317,8 @@ void kiptablesgenerator::accept()
     	"$IPTABLES -t nat -F POSTROUTING\n"
     	"echo 0 > /proc/sys/net/ipv4/ip_forward\n");
   }
- 
-  this->hide();
-  makeScript(rulesList, undoList, ((KComboBox*) namedWidgets["distro"])->currentItem());
 }
+
 void kiptablesgenerator::slotShownRules()
 {
   QDialog::accept();
