@@ -34,6 +34,7 @@
 #include "distroPage.h"
 #include "interfacesPage.h"
 #include "textPage.h"
+#include "yesNoPage.h"
 
 #include "rulesdialog.h"
 
@@ -62,7 +63,7 @@ private:
   kiptg::textPage* m_welcomePage;
   kiptg::distroPage* m_distroPage;
   kiptg::interfacesPage* m_interfacesPage;
-  QFrame *incomingPage;
+  kiptg::yesNoPage* m_incomingPage;
   QFrame *iPolicyPage;
   QFrame *iHostsPage;
   QFrame *iConntrackPage;
@@ -78,7 +79,6 @@ private:
   void setupNewForwardDialog();
   void setupNewHostDialog();
 
- void setupIncomingPage();
   void setupIPolicyPage();
   void setupIHostsPage();
   void setupIConntrackPage();

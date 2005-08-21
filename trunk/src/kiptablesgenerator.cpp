@@ -67,8 +67,13 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
   m_interfacesPage = new interfacesPage(this);
   this->addPage(m_interfacesPage, i18n("Interfaces"));
   
-  setupIncomingPage();
-  setAppropriate(incomingPage, false); // don't show this page, but set it up so accept() can reference it's settings
+  m_incomingPage = new yesNoPage(i18n(
+    "<p>Do you want to filter incoming data? (recommended)</p>"
+    "<p>This will allow you to control other computer's access to "
+    "your computer.</p>"), this);
+  this->addPage(m_incomingPage, i18n("Incoming Packets"));
+  setAppropriate(m_incomingPage, false); // don't show this page, but create it so accept() can reference it's settings
+  
   setupIPolicyPage();
   setupIConntrackPage();
   setupIPortsPage();
@@ -304,41 +309,6 @@ void kiptablesgenerator::makeScript(QString &rulesList, QString &undoList, int d
   rulesDialog = new RulesDialog(this,(char*) 0, &output);
   rulesDialog->show();
   connect(rulesDialog, SIGNAL(closeClicked()), this, SLOT(slotShownRules()));
-}
-
-void kiptablesgenerator::setupIncomingPage()
-{
-  incomingPage = new QFrame(this);
-  
-  QGridLayout *layout = new QGridLayout(incomingPage, 2, 2);
-  layout->setSpacing(KDialogBase::spacingHint());
-  
-  QLabel *intro = new QLabel(i18n(
-    "<p>Do you want to filter incoming data? (recommended)</p>"
-    "<p>This will allow you to control other computers access to "
-    "your computer.</p>"), incomingPage);
-  intro->show();
-  layout->addMultiCellWidget(intro, 0, 0, 0, 1);
-  
-  QButtonGroup *optYesNo = new QButtonGroup(incomingPage);
-  optYesNo->hide();
-  
-  QRadioButton *optYes = new QRadioButton(i18n("&Yes"), incomingPage);
-  optYes->setChecked(true);
-  optYes->setName("yes");
-  optYes->show();
-  layout->addWidget(optYes, 1, 0);
-  namedWidgets["incomingBool"] = optYes;
-  optYesNo->insert(optYes);
-  
-  QRadioButton *optNo = new QRadioButton(i18n("N&o"), incomingPage);
-  optNo->setName("no");
-  optNo->show();
-  layout->addWidget(optNo, 1, 1);
-  optYesNo->insert(optNo);
-  
-  incomingPage->show();
-  this->addPage(incomingPage, i18n("Incoming Data"));
 }
 
 void kiptablesgenerator::setupIPolicyPage()
@@ -1020,7 +990,7 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
 {
 	QStringList sections;
 
-  if (((QCheckBox*) namedWidgets["incomingBool"])->isChecked())
+  if (m_incomingPage->value())
   {
   	rulesList = "##### Set the incoming policy - this decides what happens with unmatches packets #####\n";
     if ( ((KComboBox*) namedWidgets["incomingPolicy"])->currentItem() == 0)
@@ -1325,7 +1295,6 @@ kiptablesgenerator::~kiptablesgenerator()
   delete newServiceDialog;
 
   delete m_welcomePage;
-  delete incomingPage;
   delete iPolicyPage;
   delete iPortsPage;
   delete iDefensiveChecksPage;
