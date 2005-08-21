@@ -49,7 +49,13 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
   setupNewServiceDialog();
   setupNewHostDialog();
 
-  setupWelcomePage();
+	welcomePage = new kiptg::textPage(i18n(
+	  "<p>Welcome to KIptablesGenerator.</p>"
+    "<p>This wizard will help you create your firewall rules.</p>"
+    "<p><i>Troubleshooting:</i> The generated script requires "
+    "iptables installed, and the netfilter conntrack, TCP, UDP, "
+    "and ICMP kernel modules loaded.</p>"), this);
+  this->addPage(welcomePage, i18n("Welcome"));
   setupDistroPage();
   setupInterfacesPage();
   setupIncomingPage();
@@ -61,7 +67,12 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
   setupFForwardingPage();
   setupFMasqueradingPage();
   setupIDefensiveChecksPage();
-  setupFinishedPage();
+  finishedPage = new kiptg::textPage(i18n(
+    "<p><b>Congratulations!</b></p>"
+    "<p>All the information required to create your firewall rules has been collected. "
+    "Please finish the wizard to generate your firewall script.</p>"), this);
+  this->addPage(finishedPage, i18n("Finished"));
+  setFinishEnabled(finishedPage, true);
   helpButton()->hide();
 }
 
@@ -226,28 +237,6 @@ void kiptablesgenerator::setupFMasqueradingPage()
   
   fMasqueradingPage->show();
   this->addPage(fMasqueradingPage, i18n("Masquerading"));
-}
-
-void kiptablesgenerator::setupWelcomePage()
-{
-  welcomePage = new QFrame(this);
-
-  QVBoxLayout *layout = new QVBoxLayout(welcomePage);
-  layout->setSpacing(KDialogBase::spacingHint());
-
-  KActiveLabel *label = new KActiveLabel(i18n(
-    "<p>Welcome to KIptablesGenerator.</p>"
-    "<p>This wizard will help you create your firewall rules.</p>"
-    "<p><i>Troubleshooting:</i> The generated script requires "
-    "iptables installed, and the netfilter conntrack, TCP, UDP, "
-    "and ICMP kernel modules loaded.</p>"), welcomePage);
-  label->show();  
-  layout->addWidget(label);
-  
-  layout->addItem(new QSpacerItem(0,0,QSizePolicy::Ignored, QSizePolicy::Ignored));
-
-  welcomePage->show();
-  this->addPage(welcomePage, i18n("Welcome"));
 }
 
 void kiptablesgenerator::setupDistroPage()
@@ -418,7 +407,7 @@ void kiptablesgenerator::setupInterfacesPage()
   layout->setSpacing(KDialogBase::spacingHint());
   
   QLabel *intro = new QLabel(i18n(
-    "<p>Which of the following interfaces do you want to filter?</p>"), interfacesPage);
+    "<p>Please select which of the following network interfaces do you want to filter.</p>"), interfacesPage);
   intro->show();
   layout->addWidget(intro);
   
@@ -1033,27 +1022,6 @@ void kiptablesgenerator::setupIDefensiveChecksPage()
   
   iDefensiveChecksPage->show();
   this->addPage(iDefensiveChecksPage, i18n("Defensive Checks"));
-}
-
-void kiptablesgenerator::setupFinishedPage()
-{
-  finishedPage = new QFrame(this);
-  
-  QVBoxLayout *layout = new QVBoxLayout(finishedPage);
-  
-  KActiveLabel *finishedLabel = new KActiveLabel(i18n(
-    "<p><b>Congratulations!</b></p>"
-    "<p>All the information required to create your firewall rules has been collected. "
-    "Please finish the wizard to generate your firewall script.</p>"), finishedPage);
-  finishedLabel->show();
-  
-  layout->addWidget(finishedLabel);
-  
-  layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Ignored, QSizePolicy::Ignored));
-  
-  finishedPage->show();
-  this->addPage(finishedPage, i18n("Finished"));
-  setFinishEnabled(finishedPage, true);
 }
 
 void kiptablesgenerator::slotNewInterface()

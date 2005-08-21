@@ -20,6 +20,7 @@
 #ifndef KIPTABLESGENERATOR_H
 #define KIPTABLESGENERATOR_H
 
+
 #include <qframe.h>
 #include <qmap.h>
 #include <qptrlist.h>
@@ -29,6 +30,8 @@
 
 #include <kdialogbase.h>
 #include <kwizard.h>
+
+#include "textPage.h"
 
 #include "rulesdialog.h"
 
@@ -54,7 +57,7 @@ private:
   KDialogBase *newForwardDialog;
   KDialogBase *newHostDialog;
 
-  QFrame *welcomePage;
+  kiptg::textPage *welcomePage;
   QFrame *distroPage;
   QFrame *interfacesPage;
   QFrame *incomingPage;
@@ -65,7 +68,7 @@ private:
   QFrame *fForwardingPage;
   QFrame *fMasqueradingPage;
   QFrame *iDefensiveChecksPage;
-  QFrame *finishedPage;
+  kiptg::textPage *finishedPage;
 
   RulesDialog* rulesDialog;
 
@@ -73,7 +76,6 @@ private:
   void setupNewForwardDialog();
   void setupNewHostDialog();
 
-  void setupWelcomePage();
   void setupDistroPage();
   void setupInterfacesPage();
   void setupIncomingPage();
@@ -84,7 +86,6 @@ private:
   void setupIDefensiveChecksPage();
   void setupFForwardingPage();
   void setupFMasqueradingPage();
-  void setupFinishedPage();
   
 public:
   enum distros {
