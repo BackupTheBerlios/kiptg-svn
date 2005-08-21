@@ -32,6 +32,7 @@
 #include <kwizard.h>
 
 #include "distroPage.h"
+#include "interfacesPage.h"
 #include "textPage.h"
 
 #include "rulesdialog.h"
@@ -58,9 +59,9 @@ private:
   KDialogBase *newForwardDialog;
   KDialogBase *newHostDialog;
 
-  kiptg::textPage *m_welcomePage;
-  kiptg::distroPage *m_distroPage;
-  QFrame *interfacesPage;
+  kiptg::textPage* m_welcomePage;
+  kiptg::distroPage* m_distroPage;
+  kiptg::interfacesPage* m_interfacesPage;
   QFrame *incomingPage;
   QFrame *iPolicyPage;
   QFrame *iHostsPage;
@@ -77,8 +78,7 @@ private:
   void setupNewForwardDialog();
   void setupNewHostDialog();
 
-  void setupInterfacesPage();
-  void setupIncomingPage();
+ void setupIncomingPage();
   void setupIPolicyPage();
   void setupIHostsPage();
   void setupIConntrackPage();
@@ -97,7 +97,6 @@ protected:
 	QPtrList<QFrame> linuxOnlyPages;
 	void linuxOutput(QString &rulesList, QString &undoList);
 protected slots:
-  void slotNewInterface();
   void slotChangedProtocol(int);
   void slotShowServiceDialog();
   void slotServiceNamedChanged(bool);

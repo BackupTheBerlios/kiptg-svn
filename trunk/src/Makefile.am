@@ -3,7 +3,7 @@ INCLUDES = -I$(top_srcdir)/src $(all_includes)
 
 # these are the headers for your project
 noinst_HEADERS = kiptablesgenerator.h kiptablesgenerator.h rulesdialog.h \
-		textPage.h distroPage.h distros.h
+		textPage.h distroPage.h distros.h interfacesPage.h
 
 # let automoc handle all of the meta source files (moc)
 METASOURCES = AUTO
@@ -22,7 +22,7 @@ bin_PROGRAMS = kiptablesgenerator
 
 # the application source, library search path, and link libraries
 kiptablesgenerator_SOURCES = main.cpp kiptablesgenerator.cpp rulesdialog.cpp \
-		textPage.cpp distroPage.cpp
+		textPage.cpp distroPage.cpp interfacesPage.cpp
 kiptablesgenerator_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 kiptablesgenerator_LDADD = $(LIB_KIO) $(LIB_KDEUI)
 

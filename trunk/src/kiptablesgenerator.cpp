@@ -59,10 +59,14 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
     "iptables installed, and the netfilter conntrack, TCP, UDP, "
     "and ICMP kernel modules loaded.</p>"), this);
   this->addPage(m_welcomePage, i18n("Welcome"));
+  
   m_distroPage = new distroPage(this);
   this->addPage(m_distroPage, i18n("Distribution"));
   connect(m_distroPage, SIGNAL(distroChanged(int )), this, SLOT(slotDistroChanged(int)));
-  setupInterfacesPage();
+  
+  m_interfacesPage = new interfacesPage(this);
+  this->addPage(m_interfacesPage, i18n("Interfaces"));
+  
   setupIncomingPage();
   setAppropriate(incomingPage, false); // don't show this page, but set it up so accept() can reference it's settings
   setupIPolicyPage();
@@ -364,40 +368,6 @@ void kiptablesgenerator::setupIPolicyPage()
   
   iPolicyPage->show();
   this->addPage(iPolicyPage, i18n("Default Action"));
-}
-
-void kiptablesgenerator::setupInterfacesPage()
-{
-  interfacesPage = new QFrame(this);
-  
-  QVBoxLayout *layout = new QVBoxLayout(interfacesPage);
-  layout->setSpacing(KDialogBase::spacingHint());
-  
-  QLabel *intro = new QLabel(i18n(
-    "<p>Please select which of the following network interfaces do you want to filter.</p>"), interfacesPage);
-  intro->show();
-  layout->addWidget(intro);
-  
-  KListBox *interfaces = new KListBox(interfacesPage);
-
-  char buffer[IFNAMSIZ];
-  for(unsigned int i = 1; if_indextoname(i, buffer) != NULL; i++)
-  	if ((QString)buffer != "lo") interfaces->insertItem((QString)buffer);
-  
-  interfaces->setSelectionMode(QListBox::Multi);
-  for (unsigned short i = 0; i < interfaces->count(); i++)
-    interfaces->setSelected(i, true);
-  interfaces->show();
-  layout->addWidget(interfaces);
-  namedWidgets["iInterfaces"] = interfaces;
-  
-  KPushButton *newInterface = new KPushButton(i18n("A&dd Interface..."), interfacesPage);
-  newInterface->show();
-  layout->addWidget(newInterface);
-  connect(newInterface, SIGNAL(clicked()), this, SLOT(slotNewInterface()));
-  
-  interfacesPage->show();
-  this->addPage(interfacesPage, i18n("Interfaces"));
 }
 
 void kiptablesgenerator::setupIConntrackPage()
@@ -991,20 +961,6 @@ void kiptablesgenerator::setupIDefensiveChecksPage()
   this->addPage(iDefensiveChecksPage, i18n("Defensive Checks"));
 }
 
-void kiptablesgenerator::slotNewInterface()
-{
-  QString interface;
-  KListBox *interfaces = (KListBox*) namedWidgets["iInterfaces"];
-  
-  interface = KInputDialog::getText(i18n("Add Interface"),
-    i18n("Enter the name of the interface, eg eth1"));
-  if (interface == "")
-    return;
-  
-  interfaces->insertItem(interface);
-  interfaces->setSelected(interfaces->count() - 1, true);
-}
-
 void kiptablesgenerator::slotUpService()
 {
   QListView* ports = (QListView*) namedWidgets["iPorts"];
@@ -1057,7 +1013,7 @@ void kiptablesgenerator::accept()
 	if ( currentOS == KIPTG_LINUX ) linuxOutput(rulesList, undoList);
  
   this->hide();
-  makeScript(rulesList, undoList, ((KComboBox*) namedWidgets["distro"])->currentItem());
+  makeScript(rulesList, undoList, m_distroPage->getDistro());
 }
 
 void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
@@ -1075,13 +1031,9 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
     sections.append(rulesList);
       
     rulesList = "##### Interfaces whitelist #####\n";
-    KListBox* interfaces = (KListBox*) namedWidgets["iInterfaces"];
-    for (unsigned int i = 0; i < interfaces->count(); i++)
-    {
-      QListBoxItem* interface = interfaces->item(i);
-      if (! interface->isSelected())
-          rulesList += QString("$IPTABLES -A INPUT -i %1 -j ACCEPT\n").arg(interface->text());
-    }
+    QStringList interfaces = m_interfacesPage->getWhitelistInterfaces();
+    for (unsigned int i = 0; i < interfaces.count(); i++)
+	    rulesList += QString("$IPTABLES -A INPUT -i %1 -j ACCEPT\n").arg(interfaces[i]);
     sections.append(rulesList);
     
     rulesList = "##### Hosts whitelist #####\n";
@@ -1373,7 +1325,6 @@ kiptablesgenerator::~kiptablesgenerator()
   delete newServiceDialog;
 
   delete m_welcomePage;
-  delete interfacesPage;
   delete incomingPage;
   delete iPolicyPage;
   delete iPortsPage;
