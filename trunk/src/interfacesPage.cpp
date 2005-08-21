@@ -20,8 +20,6 @@
 
 #include "interfacesPage.h"
 
-#include <netdb.h>
-#include <netinet/in.h>
 #include <net/if.h>
 
 #include <qlabel.h>

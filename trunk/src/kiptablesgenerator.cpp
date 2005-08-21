@@ -49,7 +49,6 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
 	currentOS = LINUX;
 
   setupNewForwardDialog();
-  setupNewServiceDialog();
   setupNewHostDialog();
 
 	m_welcomePage = new textPage(i18n(
@@ -90,7 +89,10 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
   m_conntrackPage->show();
   this->addPage(m_conntrackPage, i18n("Connection Tracking"));
   
-  setupIPortsPage();
+  m_portsPage = new portsPage(i18n("<p>Here you can select which services are available to the outside world.</p>"), this);
+  m_portsPage->show();
+  this->addPage(m_portsPage, i18n("Incoming Services"));
+  
   setupIHostsPage();
   setupFForwardingPage();
   setupFMasqueradingPage();
@@ -325,54 +327,6 @@ void kiptablesgenerator::makeScript(QString &rulesList, QString &undoList, int d
   connect(rulesDialog, SIGNAL(closeClicked()), this, SLOT(slotShownRules()));
 }
 
-void kiptablesgenerator::setupIPortsPage()
-{
-  iPortsPage = new QFrame(this);
-  QGridLayout *layout = new QGridLayout(iPortsPage, 6, 2);
-  layout->setSpacing(KDialogBase::spacingHint());
-  
-  QLabel *intro = new QLabel(
-    i18n("<p>Here you can select which services are available to the outside world.</p>"),
-    iPortsPage);
-  intro->show();
-  layout->addMultiCellWidget(intro, 0, 0, 0, 1);
-  
-  KListView *ports = new KListView(iPortsPage);
-  ports->addColumn(i18n("Port"));
-  ports->addColumn(i18n("Protocol"));
-  ports->addColumn(i18n("Action"));
-  ports->addColumn(i18n("Service"));
-  ports->setSorting(-1);
-  ports->show();
-  layout->addMultiCellWidget(ports, 1, 5, 0, 0);
-  namedWidgets["iPorts"] = ports;
-  
-  KPushButton *newService = new KPushButton(i18n("A&dd Service"), iPortsPage);
-  newService->show();
-  layout->addWidget(newService, 1, 1);
-  connect(newService, SIGNAL(clicked()), this, SLOT(slotShowServiceDialog()));
-  
-  KPushButton *delService = new KPushButton(i18n("&Remove Service"), iPortsPage);
-  delService->show();
-  layout->addWidget(delService, 2, 1);
-  connect(delService, SIGNAL(clicked()), this, SLOT(slotDelService()));
-  
-  KPushButton *upService = new KPushButton(i18n("&Move Up"), iPortsPage);
-  upService->show();
-  layout->addWidget(upService, 3, 1);
-  connect(upService, SIGNAL(clicked()), this, SLOT(slotUpService()));
-  
-  KPushButton *downService = new KPushButton(i18n("M&ove Down"), iPortsPage);
-  downService->show();
-  layout->addWidget(downService, 4, 1);
-  connect(downService, SIGNAL(clicked()), this, SLOT(slotDownService()));
-  
-  layout->setColStretch(0, 1);
-  
-  iPortsPage->show();
-  this->addPage(iPortsPage, i18n("Incoming Ports"));
-}
-
 void kiptablesgenerator::setupNewHostDialog()
 {
   newHostDialog = new KDialogBase(this, 0, true, i18n("Add Host"), KDialogBase::Ok | KDialogBase::Cancel);
@@ -500,112 +454,6 @@ void kiptablesgenerator::setupNewForwardDialog()
   newForwardDialog->setMainWidget(dialogArea);
 }
 
-void kiptablesgenerator::slotShowServiceDialog()
-{
-  // Reset dialog
-  ((KComboBox *) namedWidgets["newService_protocols"])->setCurrentItem(0);
-  slotChangedProtocol(0);
-  ((QRadioButton*) namedWidgets["newService_named"])->setChecked(true);
-  ((KComboBox *) namedWidgets["newService_names"])->setCurrentItem(0);
-  ((KLineEdit*) namedWidgets["newService_ports"])->setText("");
-  ((QRadioButton*) namedWidgets["newService_allow"])->setChecked(true);
-  slotServiceNamedChanged(true);
-
-  newServiceDialog->show();
-}
-
-void kiptablesgenerator::setupNewServiceDialog()
-{
-  newServiceDialog = new KDialogBase(this, 0, true, i18n("Add Service"), KDialogBase::Ok | KDialogBase::Cancel);
-  
-  QFrame *dialogArea = new QFrame(newServiceDialog);
-  QGridLayout *layout = new QGridLayout(dialogArea, 7, 2);
-  layout->setSpacing(KDialogBase::spacingHint());
-  
-  KActiveLabel *intro = new KActiveLabel(i18n(
-    "<p><i>Advanced users only</i></p>"
-    "<p>Here you can allow or deny access to services through your firewall.<br />"
-    "You can specify a port range in the box using this format: <tt>fromPort:toPort</tt>, "
-    "or you can specify multiple ports by seperating them with commas.</p>"), dialogArea);
-  intro->show();
-  layout->addMultiCellWidget(intro, 0, 0, 0, 1);
-  
-  QLabel *protocolLabel = new QLabel(i18n("&Protocol: "), dialogArea);
-  protocolLabel->show();
-  layout->addWidget(protocolLabel, 1, 0);
- 
-  KComboBox *protocols = new KComboBox(dialogArea);
-  protocols->insertItem(i18n("TCP"));
-  protocols->insertItem(i18n("UDP"));
-  protocols->insertItem(i18n("TCP & UDP"));
-  protocols->insertItem(i18n("ICMP"));
-  protocols->setCurrentItem(2);
-  protocols->show();
-  layout->addWidget(protocols, 1, 1);
-  protocolLabel->setBuddy(protocols);
-  namedWidgets["newService_protocols"] = protocols;
-  connect(protocols, SIGNAL(activated(int )), this, SLOT(slotChangedProtocol(int )));
-  
-  QLabel *selectByLabel = new QLabel(i18n("Select service by: "), dialogArea);
-  selectByLabel->show();
-  layout->addMultiCellWidget(selectByLabel, 2, 2, 0, 1);
-  
-  QButtonGroup *optNamedOrNumbered = new QButtonGroup(dialogArea);
-  optNamedOrNumbered->hide();
-  
-  QRadioButton *optNamed = new QRadioButton(i18n("&Name: "), dialogArea);
-  optNamed->setChecked(true);
-  optNamed->setName("named");
-  optNamedOrNumbered->insert(optNamed);
-  optNamed->show();
-  layout->addWidget(optNamed, 3, 0);
-  namedWidgets["newService_named"] = optNamed;
-  connect(optNamed, SIGNAL(toggled(bool )), this, SLOT(slotServiceNamedChanged(bool )));
-  
-  KComboBox *names = new KComboBox(dialogArea);
-  names->show();
-  layout->addWidget(names, 3, 1);
-  namedWidgets["newService_names"] = names;
-  
-  QRadioButton *optNumbered = new QRadioButton(i18n("&Port number(s): "), dialogArea);
-  optNumbered->setName("numbered");
-  optNamedOrNumbered->insert(optNumbered);
-  optNumbered->show();
-  layout->addWidget(optNumbered, 4, 0);
-  namedWidgets["newService_numbered"] = optNumbered;
-  
-  KLineEdit *ports = new KLineEdit(dialogArea);
-  ports->show();
-  layout->addWidget(ports, 4, 1);
-  namedWidgets["newService_ports"] = ports;
-  
-  QButtonGroup *optAllowDeny = new QButtonGroup(dialogArea);
-  optAllowDeny->hide();
-  
-  KSeparator *separator = new KSeparator(dialogArea);
-  separator->show();
-  layout->addMultiCellWidget(separator, 5, 5, 0, 1);
-  
-  QRadioButton *optAllow = new QRadioButton(i18n("&Accept"), dialogArea);
-  optAllow->setName(i18n("Accept"));
-  optAllow->setChecked(true);
-  optAllow->show();
-  optAllowDeny->insert(optAllow);
-  layout->addWidget(optAllow, 6, 0);
-  namedWidgets["newService_allow"] = optAllow;
-  
-  QRadioButton *optDeny = new QRadioButton(i18n("&Drop"), dialogArea);
-  optDeny->setName(i18n("Drop"));
-  optDeny->show();
-  optAllowDeny->insert(optDeny);
-  layout->addWidget(optDeny, 6, 1);
-    
-  dialogArea->show();
-  newServiceDialog->setMainWidget(dialogArea);
-  connect(newServiceDialog, SIGNAL(okClicked()), this, SLOT(slotAddService()));
-  slotChangedProtocol(2); // TCP+UDP
-}
-
 void kiptablesgenerator::slotShowHostDialog()
 {
   ((QRadioButton*) namedWidgets["newHost_allow"])->setChecked(true);
@@ -670,51 +518,6 @@ void kiptablesgenerator::slotAddForward()
     item = 0; // stop unused variable warnings
 }
 
-void kiptablesgenerator::slotServiceNamedChanged(bool named)
-{
-  namedWidgets["newService_names"]->setEnabled(named);
-  namedWidgets["newService_ports"]->setEnabled(!named);
-}
-
-void kiptablesgenerator::slotAddService()
-{
-  KListView *ports = (KListView*) namedWidgets["iPorts"];
-  QString protoName = ((KComboBox*) namedWidgets["newService_protocols"])->currentText();
-  QString portName, portNumber;
-  QString action;
-  ((QRadioButton*) namedWidgets["newService_allow"])->isChecked()
-    ? action = i18n("Allow")
-    : action = i18n("Deny");
-  
-  if (protoName != i18n("ICMP"))
-  {
-    if (((QRadioButton*) namedWidgets["newService_named"])->isChecked())
-    {
-      portName = ((KComboBox*) namedWidgets["newService_names"])->currentText();
-      struct servent *service;
-      service = getservbyname(portName.lower().ascii(), NULL);
-      portNumber = QString::number(ntohs(service->s_port));
-    }
-    else
-    {
-      portName = "";
-      portNumber = ((KLineEdit*) namedWidgets["newService_ports"])->text();
-    }
-  }
-  else
-  {
-    portNumber = "";
-    portName = ((KComboBox*) namedWidgets["newService_names"])->currentText().stripWhiteSpace();
-  }
-  
-  KListViewItem *item = new KListViewItem(ports,
-    portNumber,
-    protoName,
-    action,
-    portName);
-  item = 0; // stop unused variable warnings
-}
-
 void kiptablesgenerator::setupIDefensiveChecksPage()
 {
   iDefensiveChecksPage = new QFrame(this);
@@ -776,37 +579,6 @@ void kiptablesgenerator::setupIDefensiveChecksPage()
   
   iDefensiveChecksPage->show();
   this->addPage(iDefensiveChecksPage, i18n("Defensive Checks"));
-}
-
-void kiptablesgenerator::slotUpService()
-{
-  QListView* ports = (QListView*) namedWidgets["iPorts"];
-  QListViewItem *sel = ports->selectedItem(), *iabove = 0;
-  
-  if (sel)
-    iabove=sel->itemAbove(); // Only check itemAbove() if it exists...
-
-  if (sel  && iabove)
-    iabove->moveItem(sel); //Move the Item
-}
-
-void kiptablesgenerator::slotDownService()
-{
-  QListView* ports = (QListView*) namedWidgets["iPorts"];
-  QListViewItem *sel = ports->selectedItem(), *ibelow = 0;
-  
-  if (sel)
-    ibelow=sel->itemBelow(); // Only check itemAbove() if it exists...
-
-  if (sel  && ibelow)
-    sel->moveItem(ibelow); //Move the Item
-}
-
-void kiptablesgenerator::slotDelService()
-{
-  QListView* ports = (QListView*) namedWidgets["iPorts"];
-  QListViewItem *sel = ports->selectedItem();
-  if (sel) delete sel;
 }
 
 void kiptablesgenerator::slotDelForward()
@@ -980,18 +752,19 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
     
     rulesList = "##### Rules to allow by ports and/or ICMP type #####\n";
 
-    KListView* services = (KListView*) namedWidgets["iPorts"];
-    QListViewItem* service = services->firstChild();
-    while (service)
+    QValueVector<struct kiptg::Service> services = m_portsPage->getServices();
+
+    for (int i = 0; i < services.count(); i++)
     {
+    	struct Service service = services[i];
       // columns: portNumber, protoName, action, portName
       QString
-        portNumber = service->text(0),
-        protocol = service->text(1),
-        action = service->text(2),
-        portName = service->text(3);
+        portNumber = service.portNumber,
+        protocol = service.protocol,
+        action = service.action,
+        portName = service.portName;
       
-      action == i18n("Accept") ? action = "ACCEPT" : action = "DROP";
+      action == i18n("Allow") ? action = "ACCEPT" : action = "DROP";
       if ( ! portNumber.contains(",") )
       {
         if (protocol == i18n("TCP & UDP") || protocol == i18n("TCP"))
@@ -1006,7 +779,6 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
       }
       if (protocol == i18n("ICMP"))
         rulesList += QString("$IPTABLES -A INPUT -p icmp -m icmp --icmp-type %1 -j %2\n").arg(portName).arg(action);
-      service = service->nextSibling();
     }
     
     sections.append(rulesList);
@@ -1071,77 +843,8 @@ void kiptablesgenerator::slotShownRules()
   QDialog::accept();
 }
 
-void kiptablesgenerator::slotChangedProtocol(int newProtocol)
-{
-  // 0 = TCP
-  // 1 = UDP
-  // 2 = TCP+UDP
-  // 3 = ICMP
-  KComboBox *names = (KComboBox*) namedWidgets["newService_names"];
-  names->clear();
-  if (newProtocol != 3)
-  {
-    names->insertItem("SSH");
-    names->insertItem("Telnet");
-    names->insertItem("HTTP");
-    names->insertItem("HTTPS");
-    names->insertItem("SMTP");
-    names->insertItem("SMTPS");
-    names->insertItem("POP3");
-    names->insertItem("POP3S");
-    names->insertItem("IMAP");
-    names->insertItem("IMAPS");
-    ((QRadioButton *) namedWidgets["newService_numbered"])->setEnabled(true);
-    ((QLineEdit *) namedWidgets["newService_ports"])->setEnabled(true);
-    return;
-  }
-  ((QRadioButton *) namedWidgets["newService_numbered"])->setEnabled(false);
-  ((QLineEdit *) namedWidgets["newService_ports"])->setEnabled(false);
-  ((QRadioButton *) namedWidgets["newService_named"])->setChecked(true);
-  names->insertItem("any");
-  names->insertItem("echo-reply");
-  names->insertItem("destination-unreachable");
-  names->insertItem(" network-unreachable");
-  names->insertItem(" host-unreachable");
-  names->insertItem(" protocol-unreachable");
-  names->insertItem(" port-unreachable");
-  names->insertItem(" fragmentation-needed");
-  names->insertItem(" source-route-failed");
-  names->insertItem(" network-unknown");
-  names->insertItem(" host-unknown");
-  names->insertItem(" network-prohibited");
-  names->insertItem(" host-prohibited");
-  names->insertItem(" TOS-network-unreachable");
-  names->insertItem(" TOS-host-unreachable");
-  names->insertItem(" communication-prohibited");
-  names->insertItem(" host-precedence-violation");
-  names->insertItem(" precedence-cutoff");
-  names->insertItem("source-quench");
-  names->insertItem("redirect");
-  names->insertItem(" network-redirect");
-  names->insertItem(" host-redirect");
-  names->insertItem(" TOS-network-redirect");
-  names->insertItem(" TOS-host-redirect");
-  names->insertItem("echo-request");
-  names->insertItem("router-advertisement");
-  names->insertItem("router-solicitation");
-  names->insertItem("time-exceeded");
-  names->insertItem(" ttl-zero-during-transit");
-  names->insertItem(" ttl-zero-during-reassembly");
-  names->insertItem("parameter-problem");
-  names->insertItem(" ip-header-bad");
-  names->insertItem(" required-option-missing");
-  names->insertItem("timestamp-request");
-  names->insertItem("timestamp-reply");
-  names->insertItem("address-mask-request");
-  names->insertItem("address-mask-reply");
-}
-
 kiptablesgenerator::~kiptablesgenerator()
 {
-  delete newServiceDialog;
-
-  delete iPortsPage;
   delete iDefensiveChecksPage;
   delete finishedPage;
 }

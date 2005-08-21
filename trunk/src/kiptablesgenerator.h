@@ -36,6 +36,7 @@
 #include "distroPage.h"
 #include "interfacesPage.h"
 #include "policyPage.h"
+#include "portsPage.h"
 #include "textPage.h"
 #include "yesNoPage.h"
 
@@ -52,9 +53,7 @@ private:
   
   QStringList mRules;
   QMap<QString, QWidget*> namedWidgets;
-  QMap<QString, unsigned int> namesToPorts;
-  
-  KDialogBase *newServiceDialog;
+    
   KDialogBase *newForwardDialog;
   KDialogBase *newHostDialog;
 
@@ -64,8 +63,8 @@ private:
   kiptg::yesNoPage *m_incomingPage;
   kiptg::policyPage *m_policyPage;
   kiptg::conntrackPage *m_conntrackPage;
+  kiptg::portsPage *m_portsPage;
   QFrame *iHostsPage;
-  QFrame *iPortsPage;
   QFrame *fForwardingPage;
   QFrame *fMasqueradingPage;
   QFrame *iDefensiveChecksPage;
@@ -73,12 +72,10 @@ private:
 
   RulesDialog* rulesDialog;
 
-  void setupNewServiceDialog();
   void setupNewForwardDialog();
   void setupNewHostDialog();
 
   void setupIHostsPage();
-  void setupIPortsPage();
   void setupIDefensiveChecksPage();
   void setupFForwardingPage();
   void setupFMasqueradingPage();
@@ -93,13 +90,6 @@ protected:
 	QPtrList<QFrame> linuxOnlyPages;
 	void linuxOutput(QString &rulesList, QString &undoList);
 protected slots:
-  void slotChangedProtocol(int);
-  void slotShowServiceDialog();
-  void slotServiceNamedChanged(bool);
-  void slotAddService();
-  void slotDelService();
-  void slotUpService();
-  void slotDownService();
   void slotShowForwardDialog();
   void slotAddForward();
   void slotDelForward();
