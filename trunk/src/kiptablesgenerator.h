@@ -34,6 +34,7 @@
 #include "constants.h"
 #include "conntrackPage.h"
 #include "distroPage.h"
+#include "hostsPage.h"
 #include "interfacesPage.h"
 #include "policyPage.h"
 #include "portsPage.h"
@@ -55,8 +56,7 @@ private:
   QMap<QString, QWidget*> namedWidgets;
     
   KDialogBase *newForwardDialog;
-  KDialogBase *newHostDialog;
-
+  
   kiptg::textPage *m_welcomePage;
   kiptg::distroPage *m_distroPage;
   kiptg::interfacesPage *m_interfacesPage;
@@ -64,7 +64,7 @@ private:
   kiptg::policyPage *m_policyPage;
   kiptg::conntrackPage *m_conntrackPage;
   kiptg::portsPage *m_portsPage;
-  QFrame *iHostsPage;
+  kiptg::hostsPage *m_hostsPage;
   QFrame *fForwardingPage;
   QFrame *fMasqueradingPage;
   QFrame *iDefensiveChecksPage;
@@ -73,7 +73,6 @@ private:
   RulesDialog* rulesDialog;
 
   void setupNewForwardDialog();
-  void setupNewHostDialog();
 
   void setupIHostsPage();
   void setupIDefensiveChecksPage();
@@ -93,9 +92,6 @@ protected slots:
   void slotShowForwardDialog();
   void slotAddForward();
   void slotDelForward();
-  void slotShowHostDialog();
-  void slotAddHost();
-  void slotDelHost();
   void slotShownRules();
   void slotMasqueradingEnabled(bool);
   void slotDistroChanged(int);

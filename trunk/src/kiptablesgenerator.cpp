@@ -49,7 +49,6 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
 	currentOS = LINUX;
 
   setupNewForwardDialog();
-  setupNewHostDialog();
 
 	m_welcomePage = new textPage(i18n(
 	  "<p>Welcome to KIptablesGenerator.</p>"
@@ -93,7 +92,14 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
   m_portsPage->show();
   this->addPage(m_portsPage, i18n("Incoming Services"));
   
-  setupIHostsPage();
+  m_hostsPage = new hostsPage(i18n(
+      "<p><i>Advanced users only</i> - If you wish to allow or block any specific hosts, "
+      "ignoring all other rules, add them to this page.</p>"), i18n(
+    "<p>Here you can tell netfilter to allow all connections from a given host regardless of other rules, "
+    "or block all connections from a given host regardless of other rules.</p>"), this);
+  m_hostsPage->show();
+  this->addPage(m_hostsPage, i18n("Host Control"));
+  
   setupFForwardingPage();
   setupFMasqueradingPage();
   setupIDefensiveChecksPage();
@@ -104,47 +110,6 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
   this->addPage(finishedPage, i18n("Finished"));
   setFinishEnabled(finishedPage, true);
   helpButton()->hide();
-}
-
-void kiptablesgenerator::setupIHostsPage()
-{
-  iHostsPage = new QFrame(this);
-  
-  QGridLayout *layout = new QGridLayout(iHostsPage, 4, 2);
-  layout->setSpacing(KDialogBase::spacingHint());
-  
-  KActiveLabel *label = new KActiveLabel(i18n(
-    "<p><i>Advanced users only</i> - If you wish to allow or block any specific hosts, "
-    "ignoring all other rules, add them to this page.</p>"),
-    iHostsPage);
-  label->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-  label->show();
-  layout->addMultiCellWidget(label, 0, 0, 0, 1);
-  
-  KListView *hosts = new KListView(iHostsPage);
-  hosts->addColumn(i18n("Allow/Block"));
-  hosts->addColumn(i18n("MAC/IP"));
-  hosts->addColumn(i18n("Host"));
-  hosts->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Ignored);
-  hosts->show();
-  namedWidgets["hostsList"] = hosts;
-  layout->addMultiCellWidget(hosts, 1, 3, 0, 0);
-  
-  KPushButton *addHost = new KPushButton(i18n("Add..."), iHostsPage);
-  addHost->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-  addHost->show();
-  layout->addWidget(addHost, 1, 1);
-  connect( addHost, SIGNAL(clicked()), this, SLOT(slotShowHostDialog()));
-  
-  KPushButton *delHost = new KPushButton(i18n("Remove"), iHostsPage);
-  delHost->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-  layout->addWidget(delHost, 2, 1);
-  connect( delHost, SIGNAL(clicked()), this, SLOT(slotDelHost()));
-  
-  layout->addItem(new QSpacerItem(QSizePolicy::Minimum, QSizePolicy::Ignored), 3, 1);
-  layout->setColStretch(0, 1);
-  
-  this->addPage(iHostsPage, i18n("Host Control"));
 }
 
 void kiptablesgenerator::slotDistroChanged(int distro)
@@ -327,76 +292,6 @@ void kiptablesgenerator::makeScript(QString &rulesList, QString &undoList, int d
   connect(rulesDialog, SIGNAL(closeClicked()), this, SLOT(slotShownRules()));
 }
 
-void kiptablesgenerator::setupNewHostDialog()
-{
-  newHostDialog = new KDialogBase(this, 0, true, i18n("Add Host"), KDialogBase::Ok | KDialogBase::Cancel);
-  
-  QFrame *dialogArea = new QFrame(newHostDialog);
-  QGridLayout *layout = new QGridLayout(dialogArea, 7, 2);
-  layout->setSpacing(KDialogBase::spacingHint());
-  
-  KActiveLabel *intro = new KActiveLabel(i18n(
-    "<p>Here you can tell netfilter to allow all connections from a given host regardless of other rules, "
-    "or block all connections from a given host regardless of other rules.</p>"), dialogArea);
-  intro->show();
-  layout->addMultiCellWidget(intro, 0, 0, 0, 1);
-
-	QLabel *label = new QLabel(i18n(
-		"<p>Do you wish to specify the host by IP address or MAC (hardware) address?</p>"), dialogArea);
-  label->show();
-  layout->addMultiCellWidget(label, 1, 1, 0, 1);
-
-  QButtonGroup *ipOrMAC = new QButtonGroup(dialogArea);
-  ipOrMAC->hide();
-  
-  QRadioButton *useIP = new QRadioButton(i18n("&Use IP"), dialogArea);
-  useIP->setChecked(true);
-  useIP->show();
-  layout->addWidget(useIP, 2, 0);
-  namedWidgets["newHost_useIP"] = useIP;
-  ipOrMAC->insert(useIP);
-  
-  QRadioButton *useMAC = new QRadioButton(i18n("U&se MAC"), dialogArea);
-  useMAC->show();
-  layout->addWidget(useMAC, 2, 1);
-  ipOrMAC->insert(useMAC);
-  
-  label = new QLabel(i18n("<p>Do you want to allow connections from this host, or block them?</p>"), dialogArea);
-  label->show();
-  layout->addMultiCellWidget(label, 3, 3, 0, 1);
-
-  QButtonGroup *whitelistOrBlacklist = new QButtonGroup(dialogArea);
-  whitelistOrBlacklist->hide();
-  
-  QRadioButton *whitelist = new QRadioButton(i18n("&Allow"), dialogArea);
-  whitelist->setChecked(true);
-  whitelist->show();
-  layout->addWidget(whitelist, 4, 0);
-  namedWidgets["newHost_allow"] = whitelist;
-  whitelistOrBlacklist->insert(whitelist);
-  
-  QRadioButton *blacklist = new QRadioButton(i18n("&Block"), dialogArea);
-  blacklist->setChecked(false);
-  blacklist->show();
-  layout->addWidget(blacklist, 4, 1);
-  whitelistOrBlacklist->insert(blacklist);
-  
- 
-  KActiveLabel *hostLabel = new KActiveLabel(i18n("Enter the IP or MAC address of the host:"), dialogArea);
-  hostLabel->show();
-  layout->addMultiCellWidget(hostLabel, 5, 5, 0, 1);
-  
-  KLineEdit *host = new KLineEdit(dialogArea);
-  host->show();
-  namedWidgets["newHost_address"] = host;
-  layout->addMultiCellWidget(host, 6, 6, 0, 1);
-  
-  connect(newHostDialog, SIGNAL(okClicked()), this, SLOT(slotAddHost()));
-  
-  dialogArea->show();
-  newHostDialog->setMainWidget(dialogArea);
-}
-
 void kiptablesgenerator::setupNewForwardDialog()
 {
   newForwardDialog = new KDialogBase(this, 0, true, i18n("Add Forward"), KDialogBase::Ok | KDialogBase::Cancel);
@@ -452,35 +347,6 @@ void kiptablesgenerator::setupNewForwardDialog()
   
   dialogArea->show();
   newForwardDialog->setMainWidget(dialogArea);
-}
-
-void kiptablesgenerator::slotShowHostDialog()
-{
-  ((QRadioButton*) namedWidgets["newHost_allow"])->setChecked(true);
-  ((QRadioButton*) namedWidgets["newHost_useIP"])->setChecked(true);
-  ((KLineEdit*) namedWidgets["newHost_address"])->setText("");
-  
-  newHostDialog->show();
-}
-
-void kiptablesgenerator::slotAddHost()
-{
-  KListView *hosts = (KListView*) namedWidgets["hostsList"];
-  
-  QString allowOrBlock, ipOrMAC;
-  ((QRadioButton*) namedWidgets["newHost_allow"])->isChecked()
-    ? allowOrBlock = i18n("Allow")
-    : allowOrBlock = i18n("Block");
-  ((QRadioButton*) namedWidgets["newHost_useIP"])->isChecked()
-    ? ipOrMAC = i18n("IP")
-    : ipOrMAC = i18n("MAC");
-  QString host = ((KLineEdit*) namedWidgets["newHost_address"])->text();
-  
-  KListViewItem *item = new KListViewItem(hosts,
-    allowOrBlock,
-    ipOrMAC,
-    host);
-  item = 0; //unused variable warnings  
 }
 
 void kiptablesgenerator::slotShowForwardDialog()
@@ -588,13 +454,6 @@ void kiptablesgenerator::slotDelForward()
   if (sel) delete sel;
 }
 
-void kiptablesgenerator::slotDelHost()
-{
-  QListView* hosts = (QListView*) namedWidgets["hostsList"];
-  QListViewItem *sel = hosts->selectedItem();
-  if (sel) delete sel;
-}
-
 void kiptablesgenerator::accept()
 {
   QString rulesList, undoList;
@@ -627,22 +486,17 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
     
     rulesList = "##### Hosts whitelist #####\n";
     
-    KListView* hosts = (KListView*) namedWidgets["hostsList"];
-    QListViewItem* host = hosts->firstChild();
-    while (host)
+    QValueVector<struct Host> hosts = m_hostsPage->getHosts();
+    for (unsigned int i = 0; i < hosts.count(); i++)
     {
-      QString
-        accept = host->text(0),
-        ipOrMAC = host->text(1),
-        address = host->text(2),
-        action;
-      accept == i18n("Allow")
+    	struct Host host = hosts[i];
+      QString action;
+      host.accept
         ? action = "ACCEPT"
         : action = "DROP";
-      ipOrMAC == i18n("IP")
-        ? rulesList += QString("$IPTABLES -A INPUT -s %1 -j %2\n").arg(address).arg(action)
-        : rulesList += QString("$IPTABLES -A INPUT -m mac --mac-source %1 -j %2\n").arg(address).arg(action);
-      host = host->nextSibling();
+      host.useIP
+        ? rulesList += QString("$IPTABLES -A INPUT -s %1 -j %2\n").arg(host.address).arg(action)
+        : rulesList += QString("$IPTABLES -A INPUT -m mac --mac-source %1 -j %2\n").arg(host.address).arg(action);
     }
     
     sections.append(rulesList);
