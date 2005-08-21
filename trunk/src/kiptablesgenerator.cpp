@@ -40,6 +40,9 @@
 #include <kpushbutton.h>
 #include <kseparator.h>
 
+#include "distros.h"
+using namespace kiptg;
+
 kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
  : KWizard(parent, name)
 {
@@ -49,14 +52,16 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
   setupNewServiceDialog();
   setupNewHostDialog();
 
-	welcomePage = new kiptg::textPage(i18n(
+	m_welcomePage = new textPage(i18n(
 	  "<p>Welcome to KIptablesGenerator.</p>"
     "<p>This wizard will help you create your firewall rules.</p>"
     "<p><i>Troubleshooting:</i> The generated script requires "
     "iptables installed, and the netfilter conntrack, TCP, UDP, "
     "and ICMP kernel modules loaded.</p>"), this);
-  this->addPage(welcomePage, i18n("Welcome"));
-  setupDistroPage();
+  this->addPage(m_welcomePage, i18n("Welcome"));
+  m_distroPage = new distroPage(this);
+  this->addPage(m_distroPage, i18n("Distribution"));
+  connect(m_distroPage, SIGNAL(distroChanged(int )), this, SLOT(slotDistroChanged(int)));
   setupInterfacesPage();
   setupIncomingPage();
   setAppropriate(incomingPage, false); // don't show this page, but set it up so accept() can reference it's settings
@@ -67,7 +72,7 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
   setupFForwardingPage();
   setupFMasqueradingPage();
   setupIDefensiveChecksPage();
-  finishedPage = new kiptg::textPage(i18n(
+  finishedPage = new textPage(i18n(
     "<p><b>Congratulations!</b></p>"
     "<p>All the information required to create your firewall rules has been collected. "
     "Please finish the wizard to generate your firewall script.</p>"), this);
@@ -237,44 +242,6 @@ void kiptablesgenerator::setupFMasqueradingPage()
   
   fMasqueradingPage->show();
   this->addPage(fMasqueradingPage, i18n("Masquerading"));
-}
-
-void kiptablesgenerator::setupDistroPage()
-{
-  distroPage = new QFrame(this);
-  
-  QVBoxLayout *layout = new QVBoxLayout(distroPage);
-  layout->setSpacing(KDialogBase::spacingHint());
-  
-  QLabel *label = new QLabel(i18n(
-    "<p>Please select which distribution you wish to use the "
-    "produced script on:</p>"), distroPage);
-  label->show();
-  layout->addWidget(label);
-  
-  KComboBox *distroList = new KComboBox(distroPage);
-  distroList->insertItem(i18n("Generic Linux"), KIPTG_GENERIC_LINUX);
-  distroList->insertItem(i18n("Slackware"), KIPTG_SLACKWARE);
-  distroList->insertItem(i18n("Gentoo"), KIPTG_GENTOO);
-  distroList->insertItem(i18n("Generic BSD"), KIPTG_GENERIC_BSD); // FIXME: these are unimplemented
-  distroList->insertItem(i18n("FreeBSD"), KIPTG_FREEBSD);
-  distroList->insertItem(i18n("NetBSD"), KIPTG_NETBSD);
-  distroList->insertItem(i18n("OpenBSD"), KIPTG_OPENBSD);
-  distroList->show();
-  layout->addWidget(distroList);
-  namedWidgets["distro"] = distroList;
-  connect( distroList, SIGNAL(activated(int)), this, SLOT(slotDistroChanged(int)));
-  
-  label = new QLabel(i18n(
-  	"<p><i>Note: If your distribution isn't listed, the 'Generic Linux' or 'Generic BSD' "
-  	"options should work for you.</i></p>"), distroPage);
-  label->show();
-  layout->addWidget(label);
-  
-  layout->addItem(new QSpacerItem(0,0, QSizePolicy::Ignored, QSizePolicy::Ignored));
-  
-  distroPage->show();
-  this->addPage(distroPage, i18n("Distribution"));
 }
 
 void kiptablesgenerator::makeScript(QString &rulesList, QString &undoList, int distro)
@@ -1405,7 +1372,7 @@ kiptablesgenerator::~kiptablesgenerator()
 {
   delete newServiceDialog;
 
-  delete welcomePage;
+  delete m_welcomePage;
   delete interfacesPage;
   delete incomingPage;
   delete iPolicyPage;

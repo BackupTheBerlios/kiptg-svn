@@ -31,6 +31,7 @@
 #include <kdialogbase.h>
 #include <kwizard.h>
 
+#include "distroPage.h"
 #include "textPage.h"
 
 #include "rulesdialog.h"
@@ -57,8 +58,8 @@ private:
   KDialogBase *newForwardDialog;
   KDialogBase *newHostDialog;
 
-  kiptg::textPage *welcomePage;
-  QFrame *distroPage;
+  kiptg::textPage *m_welcomePage;
+  kiptg::distroPage *m_distroPage;
   QFrame *interfacesPage;
   QFrame *incomingPage;
   QFrame *iPolicyPage;
@@ -76,7 +77,6 @@ private:
   void setupNewForwardDialog();
   void setupNewHostDialog();
 
-  void setupDistroPage();
   void setupInterfacesPage();
   void setupIncomingPage();
   void setupIPolicyPage();
@@ -88,15 +88,6 @@ private:
   void setupFMasqueradingPage();
   
 public:
-  enum distros {
-  	KIPTG_GENERIC_LINUX,
-    KIPTG_SLACKWARE,
-    KIPTG_GENTOO,
-    KIPTG_GENERIC_BSD,
-    KIPTG_FREEBSD,
-    KIPTG_NETBSD,
-    KIPTG_OPENBSD
-  };
   kiptablesgenerator(QWidget *parent = 0, const char *name = 0);
 
   ~kiptablesgenerator();
