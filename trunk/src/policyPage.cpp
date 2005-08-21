@@ -18,23 +18,39 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <textPage.h>
+#include "policyPage.h"
 
-#include <kactivelabel.h>
-#include <kdialogbase.h>
+#include <qlabel.h>
 #include <qlayout.h>
 
-namespace kiptg {
-	textPage::textPage(QString text, QWidget* parent)
-		: QFrame(parent) 
+#include <kdialogbase.h>
+#include <klocale.h>
+
+#include "constants.h"
+
+namespace kiptg
+{
+	policyPage::policyPage(QString text, QWidget* parent) : QFrame(parent)
 	{
-		QVBoxLayout *layout = new QVBoxLayout(this);
-		layout->setSpacing(KDialogBase::spacingHint());
-		
-		KActiveLabel *label = new KActiveLabel(text, this);
-		label->show();
-		layout->addWidget(label);
-		
-		layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
-  }
+    QVBoxLayout *layout = new QVBoxLayout(this);
+    layout->setSpacing(KDialogBase::spacingHint());
+    
+    QLabel *intro = new QLabel(text, this);
+    intro->show();
+    layout->addWidget(intro);
+    
+    m_policy = new KComboBox(this);
+    m_policy->insertItem(i18n("Accept"), ACCEPT);
+    m_policy->insertItem(i18n("Drop"), DROP);
+    m_policy->setCurrentItem(1);
+    m_policy->show();
+    layout->addWidget(m_policy);
+    
+    layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Ignored, QSizePolicy::Ignored));
+	};
+	
+	int policyPage::value()
+	{
+		return m_policy->currentItem();
+	}
 }

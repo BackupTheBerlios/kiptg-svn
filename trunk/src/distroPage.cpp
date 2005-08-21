@@ -26,7 +26,7 @@
 #include <kdialogbase.h>
 #include <klocale.h>
 
-#include "distros.h"
+#include "constants.h"
 
 namespace kiptg
 {
@@ -42,13 +42,13 @@ namespace kiptg
     layout->addWidget(label);
 		
 		m_distroList = new KComboBox(this);
-    m_distroList->insertItem(i18n("Generic Linux"), KIPTG_GENERIC_LINUX);
-    m_distroList->insertItem(i18n("Slackware"), KIPTG_SLACKWARE);
-    m_distroList->insertItem(i18n("Gentoo"), KIPTG_GENTOO);
-    m_distroList->insertItem(i18n("Generic BSD"), KIPTG_GENERIC_BSD); // FIXME: these are unimplemented
-    m_distroList->insertItem(i18n("FreeBSD"), KIPTG_FREEBSD);
-    m_distroList->insertItem(i18n("NetBSD"), KIPTG_NETBSD);
-    m_distroList->insertItem(i18n("OpenBSD"), KIPTG_OPENBSD);
+    m_distroList->insertItem(i18n("Generic Linux"), GENERIC_LINUX);
+    m_distroList->insertItem(i18n("Slackware"), SLACKWARE);
+    m_distroList->insertItem(i18n("Gentoo"), GENTOO);
+    m_distroList->insertItem(i18n("Generic BSD"), GENERIC_BSD); // FIXME: these are unimplemented
+    m_distroList->insertItem(i18n("FreeBSD"), FREEBSD);
+    m_distroList->insertItem(i18n("NetBSD"), NETBSD);
+    m_distroList->insertItem(i18n("OpenBSD"), OPENBSD);
     m_distroList->show();
     layout->addWidget(m_distroList);
     connect(m_distroList, SIGNAL(activated(int )), this, SIGNAL(distroChanged(int )));

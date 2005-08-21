@@ -31,8 +31,11 @@
 #include <kdialogbase.h>
 #include <kwizard.h>
 
+#include "constants.h"
+#include "conntrackPage.h"
 #include "distroPage.h"
 #include "interfacesPage.h"
+#include "policyPage.h"
 #include "textPage.h"
 #include "yesNoPage.h"
 
@@ -45,12 +48,7 @@ class kiptablesgenerator : public KWizard
 {
 Q_OBJECT
 private:
-	enum os {
-		KIPTG_LINUX,
-		KIPTG_BSD
-  };
-  
-  os currentOS;
+  kiptg::os currentOS;
   
   QStringList mRules;
   QMap<QString, QWidget*> namedWidgets;
@@ -60,13 +58,13 @@ private:
   KDialogBase *newForwardDialog;
   KDialogBase *newHostDialog;
 
-  kiptg::textPage* m_welcomePage;
-  kiptg::distroPage* m_distroPage;
-  kiptg::interfacesPage* m_interfacesPage;
-  kiptg::yesNoPage* m_incomingPage;
-  QFrame *iPolicyPage;
+  kiptg::textPage *m_welcomePage;
+  kiptg::distroPage *m_distroPage;
+  kiptg::interfacesPage *m_interfacesPage;
+  kiptg::yesNoPage *m_incomingPage;
+  kiptg::policyPage *m_policyPage;
+  kiptg::conntrackPage *m_conntrackPage;
   QFrame *iHostsPage;
-  QFrame *iConntrackPage;
   QFrame *iPortsPage;
   QFrame *fForwardingPage;
   QFrame *fMasqueradingPage;
@@ -79,9 +77,7 @@ private:
   void setupNewForwardDialog();
   void setupNewHostDialog();
 
-  void setupIPolicyPage();
   void setupIHostsPage();
-  void setupIConntrackPage();
   void setupIPortsPage();
   void setupIDefensiveChecksPage();
   void setupFForwardingPage();

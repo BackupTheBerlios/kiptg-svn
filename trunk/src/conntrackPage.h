@@ -18,23 +18,33 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <textPage.h>
+#ifndef CONNTRACKPAGE_H
+#define CONNTRACKPAGE_H
 
-#include <kactivelabel.h>
-#include <kdialogbase.h>
-#include <qlayout.h>
+#include <qcheckbox.h>
+#include <qframe.h>
 
-namespace kiptg {
-	textPage::textPage(QString text, QWidget* parent)
-		: QFrame(parent) 
+#include "constants.h"
+
+namespace kiptg 
+{
+	class conntrackPage : public QFrame
 	{
-		QVBoxLayout *layout = new QVBoxLayout(this);
-		layout->setSpacing(KDialogBase::spacingHint());
-		
-		KActiveLabel *label = new KActiveLabel(text, this);
-		label->show();
-		layout->addWidget(label);
-		
-		layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
-  }
+  Q_OBJECT
+  private:
+  	QCheckBox *m_allSame;
+  	QCheckBox *m_allEST, *m_allREL, *m_allNEW;
+  	QCheckBox *m_tcpEST, *m_tcpREL, *m_tcpNEW;
+  	QCheckBox *m_udpEST, *m_udpREL, *m_udpNEW;
+  	QCheckBox *m_icmpEST, *m_icmpREL, *m_icmpNEW;
+  public:
+  	conntrackPage::conntrackPage(QWidget* parent);
+  	bool allSame();
+  	int getAll(); // these return the kiptg::ctstate enum
+  	int getTCP();
+  	int getUDP();
+  	int getICMP();
+	};
 }
+
+#endif

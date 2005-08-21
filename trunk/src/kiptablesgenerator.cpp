@@ -40,13 +40,13 @@
 #include <kpushbutton.h>
 #include <kseparator.h>
 
-#include "distros.h"
+#include "constants.h"
 using namespace kiptg;
 
 kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
  : KWizard(parent, name)
 {
-	currentOS = KIPTG_LINUX;
+	currentOS = LINUX;
 
   setupNewForwardDialog();
   setupNewServiceDialog();
@@ -58,24 +58,38 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
     "<p><i>Troubleshooting:</i> The generated script requires "
     "iptables installed, and the netfilter conntrack, TCP, UDP, "
     "and ICMP kernel modules loaded.</p>"), this);
+  m_welcomePage->show();
   this->addPage(m_welcomePage, i18n("Welcome"));
   
   m_distroPage = new distroPage(this);
+  m_distroPage->show();
   this->addPage(m_distroPage, i18n("Distribution"));
   connect(m_distroPage, SIGNAL(distroChanged(int )), this, SLOT(slotDistroChanged(int)));
   
   m_interfacesPage = new interfacesPage(this);
+  m_interfacesPage->show();
   this->addPage(m_interfacesPage, i18n("Interfaces"));
   
   m_incomingPage = new yesNoPage(i18n(
     "<p>Do you want to filter incoming data? (recommended)</p>"
     "<p>This will allow you to control other computer's access to "
     "your computer.</p>"), this);
+  //m_incomingPage->show();
   this->addPage(m_incomingPage, i18n("Incoming Packets"));
   setAppropriate(m_incomingPage, false); // don't show this page, but create it so accept() can reference it's settings
   
-  setupIPolicyPage();
-  setupIConntrackPage();
+  m_policyPage = new policyPage(i18n(
+    "<p>What do you want your firewall to do to unmatched packets?</p>"
+    "<p>Your firewall can either accept unmatched packets, or drop unmatched "
+    "packets; the recommended option is to drop unmatched packets.</p>"
+    "<p><i>Advanced users: This sets the policy for the INPUT chain.</i></p>"), this);
+  m_policyPage->show();
+  this->addPage(m_policyPage, i18n("Default Action"));
+  
+  m_conntrackPage = new conntrackPage(this);
+  m_conntrackPage->show();
+  this->addPage(m_conntrackPage, i18n("Connection Tracking"));
+  
   setupIPortsPage();
   setupIHostsPage();
   setupFForwardingPage();
@@ -135,25 +149,25 @@ void kiptablesgenerator::slotDistroChanged(int distro)
 {
 	switch (distro)
 	{
-		case KIPTG_GENERIC_LINUX:
-		case KIPTG_SLACKWARE:
-		case KIPTG_GENTOO:
-			if ( currentOS == KIPTG_LINUX )
+		case GENERIC_LINUX:
+		case SLACKWARE:
+		case GENTOO:
+			if ( currentOS == LINUX )
 				return;
       for ( unsigned int i = 0; i < linuxOnlyPages.count(); i++)
       	setAppropriate(linuxOnlyPages.at(i), true);
       for ( unsigned int i = 0; i < linuxOnlyWidgets.count(); i++)
       	linuxOnlyWidgets.at(i)->setEnabled(true);
-      currentOS = KIPTG_LINUX;
+      currentOS = LINUX;
 			break;
     default: // BSD
-    	if ( currentOS == KIPTG_BSD )
+    	if ( currentOS == BSD )
     		return;
       for ( unsigned int i = 0; i < linuxOnlyPages.count(); i++)
       	setAppropriate(linuxOnlyPages.at(i), false);
       for ( unsigned int i = 0; i < linuxOnlyWidgets.count(); i++)
       	linuxOnlyWidgets.at(i)->setEnabled(false);
-      currentOS = KIPTG_BSD;
+      currentOS = BSD;
     	break;
 	}
 }
@@ -265,10 +279,10 @@ void kiptablesgenerator::makeScript(QString &rulesList, QString &undoList, int d
   
   switch (distro)
   {
-  	case KIPTG_GENERIC_LINUX:
+  	case GENERIC_LINUX:
   		output = "#!/bin/sh\n" + copyrightText + "IPTABLES=/usr/sbin/iptables\n\n" + rulesList;
   		break;
-    case KIPTG_SLACKWARE:
+    case SLACKWARE:
       output = "#!/bin/sh\n" + copyrightText + "IPTABLES=/usr/sbin/iptables\n\n"
         "function start() {\n" + rulesList +
         "}\n"
@@ -290,7 +304,7 @@ void kiptablesgenerator::makeScript(QString &rulesList, QString &undoList, int d
         "\t\tstart;\n"
         "esac";
       break;
-    case KIPTG_GENTOO:
+    case GENTOO:
       output = "#!/sbin/runscript\n" + copyrightText + 
         "IPTABLES=/sbin/iptables\n\n"
         "start() {\n"
@@ -309,173 +323,6 @@ void kiptablesgenerator::makeScript(QString &rulesList, QString &undoList, int d
   rulesDialog = new RulesDialog(this,(char*) 0, &output);
   rulesDialog->show();
   connect(rulesDialog, SIGNAL(closeClicked()), this, SLOT(slotShownRules()));
-}
-
-void kiptablesgenerator::setupIPolicyPage()
-{
-  iPolicyPage = new QFrame(this);
-  
-  QVBoxLayout *layout = new QVBoxLayout(iPolicyPage);
-  layout->setSpacing(KDialogBase::spacingHint());
-  
-  QLabel *intro = new QLabel(i18n(
-    "<p>What do you want your firewall to do to unmatched packets?</p>"
-    "<p>Your firewall can either accept unmatched packets, or drop unmatched "
-    "packets; the recommended option is to drop unmatched packets.</p>"
-    "<p><i>Advanced users: This sets the policy for the INPUT chain.</i></p>"), iPolicyPage);
-  intro->show();
-  layout->addWidget(intro);
-  
-  KComboBox *options = new KComboBox(iPolicyPage);
-  options->insertItem(i18n("Accept"));
-  options->insertItem(i18n("Drop"));
-  options->setCurrentItem(1);
-  options->show();
-  layout->addWidget(options);
-  namedWidgets["incomingPolicy"] = options;
-  
-  layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Ignored, QSizePolicy::Ignored));
-  
-  iPolicyPage->show();
-  this->addPage(iPolicyPage, i18n("Default Action"));
-}
-
-void kiptablesgenerator::setupIConntrackPage()
-{
-  iConntrackPage = new QFrame(this);
-  QGridLayout *layout = new QGridLayout(iConntrackPage, 8, 4);
-  layout->setSpacing(KDialogBase::spacingHint());
-  
-  QLabel *intro = new QLabel(i18n( "<p><i>Advanced users only</i> - "
-    "The defaults here are sensible, and will work for most users.</p>"
-    "<p>If packets match one of the following connection states, they "
-    "will be admitted by the firewall.</p>"), iConntrackPage);
-  intro->show();
-  layout->addMultiCellWidget(intro, 0, 0, 0, 3);
-  
-  QCheckBox *allSame = new QCheckBox(i18n("Use same settings for all protocols"), iConntrackPage);
-  allSame->show();
-  layout->addMultiCellWidget(allSame, 1, 1, 0, 3);
-  namedWidgets["iConntrackAllSame"] = allSame;
-  
-  // ALL CONNTRACK
-  
-  QLabel *allLabel = new QLabel(i18n("All: "), iConntrackPage);
-  allLabel->show();
-  layout->addWidget(allLabel, 2, 0);
-  
-  QCheckBox *allEstablished = new QCheckBox(i18n("Established"), iConntrackPage);
-  allEstablished->setChecked(true);
-  allEstablished->show();
-  namedWidgets["iConntrackAllEstablished"] = allEstablished;
-  layout->addWidget(allEstablished, 2, 1);
-  
-  QCheckBox *allRelated = new QCheckBox(i18n("Related"), iConntrackPage);
-  allRelated->setChecked(true);
-  allRelated->show();
-  namedWidgets["iConntrackAllRelated"] = allRelated;
-  layout->addWidget(allRelated, 2, 2);
-  
-  QCheckBox *allNew = new QCheckBox(i18n("New"), iConntrackPage);
-  allNew->show();
-  namedWidgets["iConntrackAllNew"] = allNew;
-  layout->addWidget(allNew, 2, 3);
-  
-  KSeparator *separator = new KSeparator(iConntrackPage);
-  layout->addMultiCellWidget(separator, 3, 3, 0, 3);
-  
-  // TCP CONNTRACK
-    
-  QLabel *tcpLabel = new QLabel(i18n("TCP: "), iConntrackPage);
-  tcpLabel->show();
-  layout->addWidget(tcpLabel, 4, 0);
-  
-  QCheckBox *tcpEstablished = new QCheckBox(i18n("Established"), iConntrackPage);
-  tcpEstablished->setChecked(true);
-  tcpEstablished->show();
-  layout->addWidget(tcpEstablished, 4, 1);
-  namedWidgets["iConntrackTcpEstablished"] = tcpEstablished;
-  
-  QCheckBox *tcpRelated = new QCheckBox(i18n("Related"), iConntrackPage);
-  tcpRelated->setChecked(true);
-  tcpRelated->show();
-  layout->addWidget(tcpRelated, 4, 2);
-  namedWidgets["iConntrackTcpRelated"] = tcpRelated;
-  
-  QCheckBox *tcpNew = new QCheckBox(i18n("New"), iConntrackPage);
-  tcpNew->show();
-  layout->addWidget(tcpNew, 4, 3);
-  namedWidgets["iConntrackTcpNew"] = tcpNew;
-  
-  // UDP CONNTRACK
-  
-  QLabel *udpLabel = new QLabel(i18n("UDP: "), iConntrackPage);
-  udpLabel->show();
-  layout->addWidget(udpLabel, 5, 0);
-  
-  QCheckBox *udpEstablished = new QCheckBox(i18n("Established"), iConntrackPage);
-  udpEstablished->setChecked(true);
-  udpEstablished->show();
-  layout->addWidget(udpEstablished, 5, 1);
-  namedWidgets["iConntrackUdpEstablished"] = udpEstablished;
-  
-  QCheckBox *udpRelated = new QCheckBox(i18n("Related"), iConntrackPage);
-  udpRelated->setChecked(true);
-  udpRelated->show();
-  layout->addWidget(udpRelated, 5, 2);
-  namedWidgets["iConntrackUdpRelated"] = udpRelated;
-  
-  QCheckBox *udpNew = new QCheckBox(i18n("New"), iConntrackPage);
-  udpNew->show();
-  layout->addWidget(udpNew, 5, 3);
-  namedWidgets["iConntrackUdpNew"] = udpNew;
-  
-  // ICMP CONNTRACK
-  
-  QLabel *icmpLabel = new QLabel(i18n("ICMP: "), iConntrackPage);
-  icmpLabel->show();
-  layout->addWidget(icmpLabel, 6, 0);
-  
-  QCheckBox *icmpEstablished = new QCheckBox(i18n("Established"), iConntrackPage);
-  icmpEstablished->setChecked(true);
-  icmpEstablished->show();
-  layout->addWidget(icmpEstablished, 6, 1);
-  namedWidgets["iConntrackICMPEstablished"] = icmpEstablished;
-  
-  QCheckBox *icmpRelated = new QCheckBox(i18n("Related"), iConntrackPage);
-  icmpRelated->setChecked(true);
-  icmpRelated->show();
-  layout->addWidget(icmpRelated, 6, 2);
-  namedWidgets["iConntrackICMPRelated"] = icmpRelated;
-  
-  QCheckBox *icmpNew = new QCheckBox(i18n("New"), iConntrackPage);
-  icmpNew->show();
-  layout->addWidget(icmpNew, 6, 3);
-  namedWidgets["iConntrackICMPNew"] = icmpNew;
-
-  connect(allSame, SIGNAL(toggled(bool )), allLabel, SLOT(setEnabled(bool )));
-  connect(allSame, SIGNAL(toggled(bool )), allEstablished, SLOT(setEnabled(bool )));
-  connect(allSame, SIGNAL(toggled(bool )), allNew, SLOT(setEnabled(bool )));
-  connect(allSame, SIGNAL(toggled(bool )), allRelated, SLOT(setEnabled(bool )));
-  connect(allSame, SIGNAL(toggled(bool )), tcpLabel, SLOT(setDisabled(bool )));
-  connect(allSame, SIGNAL(toggled(bool )), tcpEstablished, SLOT(setDisabled(bool )));
-  connect(allSame, SIGNAL(toggled(bool )), tcpNew, SLOT(setDisabled(bool )));
-  connect(allSame, SIGNAL(toggled(bool )), tcpRelated, SLOT(setDisabled(bool )));
-  connect(allSame, SIGNAL(toggled(bool )), udpLabel, SLOT(setDisabled(bool )));
-  connect(allSame, SIGNAL(toggled(bool )), udpEstablished, SLOT(setDisabled(bool )));
-  connect(allSame, SIGNAL(toggled(bool )), udpNew, SLOT(setDisabled(bool )));
-  connect(allSame, SIGNAL(toggled(bool )), udpRelated, SLOT(setDisabled(bool )));
-  connect(allSame, SIGNAL(toggled(bool )), icmpLabel, SLOT(setDisabled(bool )));
-  connect(allSame, SIGNAL(toggled(bool )), icmpEstablished, SLOT(setDisabled(bool )));
-  connect(allSame, SIGNAL(toggled(bool )), icmpNew, SLOT(setDisabled(bool )));
-  connect(allSame, SIGNAL(toggled(bool )), icmpRelated, SLOT(setDisabled(bool )));
-  
-  allSame->setChecked(true);
-  
-  layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Ignored, QSizePolicy::Ignored));
-  
-  iConntrackPage->show();
-  this->addPage(iConntrackPage, i18n("Connection Tracking"));
 }
 
 void kiptablesgenerator::setupIPortsPage()
@@ -980,7 +827,7 @@ void kiptablesgenerator::accept()
 {
   QString rulesList, undoList;
 
-	if ( currentOS == KIPTG_LINUX ) linuxOutput(rulesList, undoList);
+	if ( currentOS == LINUX ) linuxOutput(rulesList, undoList);
  
   this->hide();
   makeScript(rulesList, undoList, m_distroPage->getDistro());
@@ -993,7 +840,7 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
   if (m_incomingPage->value())
   {
   	rulesList = "##### Set the incoming policy - this decides what happens with unmatches packets #####\n";
-    if ( ((KComboBox*) namedWidgets["incomingPolicy"])->currentItem() == 0)
+    if (m_policyPage->value() == kiptg::ACCEPT)
       rulesList += "$IPTABLES -P INPUT ACCEPT\n";
     else
       rulesList += "$IPTABLES -P INPUT DROP\n";
@@ -1096,36 +943,36 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
     
     rulesList = "##### Connection tracking rules #####\n";
     
-    if ( ((QCheckBox*) namedWidgets["iConntrackAllSame"])->isChecked() )
+    if ( m_conntrackPage->allSame() )
     {
-      if ( ((QCheckBox*) namedWidgets["iConntrackAllEstablished"])->isChecked() )
+      if ( (m_conntrackPage->getAll() & kiptg::ESTABLISHED) != 0 )
         rulesList += "$IPTABLES -A INPUT -m conntrack --ctstate ESTABLISHED -j ACCEPT\n";
-      if ( ((QCheckBox*) namedWidgets["iConntrackAllRelated"])->isChecked() )
+      if ( (m_conntrackPage->getAll() & kiptg::RELATED) != 0 )
         rulesList += "$IPTABLES -A INPUT -m conntrack --ctstate RELATED -j ACCEPT\n";
-      if ( ((QCheckBox*) namedWidgets["iConntrackAllNew"])->isChecked() )
+      if ( (m_conntrackPage->getAll() & kiptg::NEW) != 0)
         rulesList += "$IPTABLES -A INPUT -m conntrack --ctstate NEW -j ACCEPT\n";
     }
     else
     {
-      if ( ((QCheckBox*) namedWidgets["iConntrackTcpEstablished"])->isChecked() )
+      if ( (m_conntrackPage->getTCP() & kiptg::ESTABLISHED) != 0 )
         rulesList += "$IPTABLES -A INPUT -p tcp -m conntrack --ctstate ESTABLISHED -j ACCEPT\n";
-      if ( ((QCheckBox*) namedWidgets["iConntrackTcpRelated"])->isChecked() )
+      if ( (m_conntrackPage->getTCP() & kiptg::RELATED) != 0)
         rulesList += "$IPTABLES -A INPUT -p tcp -m conntrack --ctstate RELATED -j ACCEPT\n";
-      if ( ((QCheckBox*) namedWidgets["iConntrackTcpNew"])->isChecked() )
+      if ( (m_conntrackPage->getTCP() & kiptg::NEW) != 0)
         rulesList += "$IPTABLES -A INPUT -p tcp -m conntrack --ctstate NEW -j ACCEPT\n";
-        
-      if ( ((QCheckBox*) namedWidgets["iConntrackUdpEstablished"])->isChecked() )
-        rulesList += "$IPTABLES -A INPUT -p udp -m conntrack --ctstate ESTABLISHED -j ACCEPT\n";
-      if ( ((QCheckBox*) namedWidgets["iConntrackUdpRelated"])->isChecked() )
-        rulesList += "$IPTABLES -A INPUT -p udp -m conntrack --ctstate RELATED -j ACCEPT\n";
-      if ( ((QCheckBox*) namedWidgets["iConntrackUdpNew"])->isChecked() )
-        rulesList += "$IPTABLES -A INPUT -p udp -m conntrack --ctstate NEW -j ACCEPT\n";
       
-      if ( ((QCheckBox*) namedWidgets["iConntrackICMPEstablished"])->isChecked() )
+      if ( (m_conntrackPage->getUDP() & kiptg::ESTABLISHED) != 0 )
+        rulesList += "$IPTABLES -A INPUT -p udp -m conntrack --ctstate ESTABLISHED -j ACCEPT\n";
+      if ( (m_conntrackPage->getUDP() & kiptg::RELATED) != 0)
+        rulesList += "$IPTABLES -A INPUT -p udp -m conntrack --ctstate RELATED -j ACCEPT\n";
+      if ( (m_conntrackPage->getUDP() & kiptg::NEW) != 0)
+        rulesList += "$IPTABLES -A INPUT -p udp -m conntrack --ctstate NEW -j ACCEPT\n";
+
+      if ( (m_conntrackPage->getICMP() & kiptg::ESTABLISHED) != 0 )
         rulesList += "$IPTABLES -A INPUT -p icmp -m conntrack --ctstate ESTABLISHED -j ACCEPT\n";
-      if ( ((QCheckBox*) namedWidgets["iConntrackICMPRelated"])->isChecked() )
+      if ( (m_conntrackPage->getICMP() & kiptg::RELATED) != 0 )
         rulesList += "$IPTABLES -A INPUT -p icmp -m conntrack --ctstate RELATED -j ACCEPT\n";
-      if ( ((QCheckBox*) namedWidgets["iConntrackICMPNew"])->isChecked() )
+      if ( (m_conntrackPage->getICMP() & kiptg::NEW) != 0 )
         rulesList += "$IPTABLES -A INPUT -p icmp -m conntrack --ctstate NEW -j ACCEPT\n";
     }
     
@@ -1294,8 +1141,6 @@ kiptablesgenerator::~kiptablesgenerator()
 {
   delete newServiceDialog;
 
-  delete m_welcomePage;
-  delete iPolicyPage;
   delete iPortsPage;
   delete iDefensiveChecksPage;
   delete finishedPage;

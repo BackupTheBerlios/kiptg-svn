@@ -17,16 +17,34 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+
+#ifndef CONSTANTS_H
+#define CONSTANTS_H
  
 namespace kiptg 
 {
+	enum ctstate {
+		ESTABLISHED = 1,
+		RELATED = 2,
+		NEW = 4,
+  };
+	enum policy {
+		ACCEPT,
+		DROP
+  };
+	enum os {
+		LINUX,
+		BSD
+  };
 	enum distros {
-    KIPTG_GENERIC_LINUX,
-    KIPTG_SLACKWARE,
-    KIPTG_GENTOO,
-    KIPTG_GENERIC_BSD,
-    KIPTG_FREEBSD,
-    KIPTG_NETBSD,
-    KIPTG_OPENBSD
+    GENERIC_LINUX,
+    SLACKWARE,
+    GENTOO,
+    GENERIC_BSD,
+    FREEBSD,
+    NETBSD,
+    OPENBSD
   };
 }
+
+#endif
