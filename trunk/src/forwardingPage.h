@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 by Fred Emmott                                     *
+ *   Copyright (C) 2005 by Fred Emmott                                     *
  *   mail@fredemmott.co.uk                                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,36 +18,50 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
- 
-namespace kiptg 
+#ifndef FORWARDINGPAGE_H
+#define FORWARDINGPAGE_H
+
+#include <qframe.h>
+#include <qradiobutton.h>
+#include <qstring.h>
+#include <qvaluevector.h>
+
+#include <kdialogbase.h>
+#include <klineedit.h>
+#include <klistview.h>
+
+#include "constants.h"
+
+namespace kiptg
 {
-	enum direction {
-		INCOMING,
-		OUTGOING
+	struct Forward
+	{
+		int direction; // contains kiptg::direction enum
+		QString from;
+		QString to;
   };
-	enum ctstate {
-		ESTABLISHED = 1,
-		RELATED = 2,
-		NEW = 4
-  };
-	enum policy {
-		ACCEPT,
-		DROP
-  };
-	enum os {
-		LINUX,
-		BSD
-  };
-	enum distros {
-    GENERIC_LINUX,
-    SLACKWARE,
-    GENTOO,
-    GENERIC_BSD,
-    FREEBSD,
-    NETBSD,
-    OPENBSD
+	class forwardingPage : public QFrame
+	{
+		Q_OBJECT
+		private:
+			void setupNewForwardDialog(QString text);
+			
+			KListView *m_forwards;
+			
+			KDialogBase *m_newForwardDialog;
+			
+			QRadioButton *m_forwardIncoming;
+			QRadioButton *m_forwardOutgoing;
+			
+			KLineEdit *m_forwardPort;
+			KLineEdit *m_forwardTo;
+    private slots:
+    	void slotShowForwardDialog();
+    	void slotAdd();
+    	void slotDel();
+    public:
+    	forwardingPage(QString text, QString newText, QWidget *parent);
+    	QValueVector<struct Forward> getForwards();
   };
 }
 

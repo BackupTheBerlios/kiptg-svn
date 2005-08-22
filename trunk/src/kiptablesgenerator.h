@@ -28,12 +28,12 @@
 #include <qstringlist.h>
 #include <qwidget.h>
 
-#include <kdialogbase.h>
 #include <kwizard.h>
 
 #include "constants.h"
 #include "conntrackPage.h"
 #include "distroPage.h"
+#include "forwardingPage.h"
 #include "hostsPage.h"
 #include "interfacesPage.h"
 #include "policyPage.h"
@@ -54,8 +54,6 @@ private:
   
   QStringList mRules;
   QMap<QString, QWidget*> namedWidgets;
-    
-  KDialogBase *newForwardDialog;
   
   kiptg::textPage *m_welcomePage;
   kiptg::distroPage *m_distroPage;
@@ -65,18 +63,15 @@ private:
   kiptg::conntrackPage *m_conntrackPage;
   kiptg::portsPage *m_portsPage;
   kiptg::hostsPage *m_hostsPage;
-  QFrame *fForwardingPage;
+  kiptg::forwardingPage *m_forwardsPage;
   QFrame *fMasqueradingPage;
   QFrame *iDefensiveChecksPage;
   kiptg::textPage *finishedPage;
 
   RulesDialog* rulesDialog;
 
-  void setupNewForwardDialog();
-
   void setupIHostsPage();
   void setupIDefensiveChecksPage();
-  void setupFForwardingPage();
   void setupFMasqueradingPage();
   
 public:
@@ -89,9 +84,6 @@ protected:
 	QPtrList<QFrame> linuxOnlyPages;
 	void linuxOutput(QString &rulesList, QString &undoList);
 protected slots:
-  void slotShowForwardDialog();
-  void slotAddForward();
-  void slotDelForward();
   void slotShownRules();
   void slotMasqueradingEnabled(bool);
   void slotDistroChanged(int);

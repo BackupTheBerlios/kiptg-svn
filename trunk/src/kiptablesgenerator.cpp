@@ -48,8 +48,6 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
 {
 	currentOS = LINUX;
 
-  setupNewForwardDialog();
-
 	m_welcomePage = new textPage(i18n(
 	  "<p>Welcome to KIptablesGenerator.</p>"
     "<p>This wizard will help you create your firewall rules.</p>"
@@ -100,7 +98,17 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
   m_hostsPage->show();
   this->addPage(m_hostsPage, i18n("Host Control"));
   
-  setupFForwardingPage();
+  m_forwardsPage = new forwardingPage(i18n(
+    "<p>If you wish to enable TCP forwarding for any ports (incoming or outgoing) add them to this page.</p>"),
+    i18n(
+    "<p><i>Advanced users only</i></p>"
+    "<p>Here you can tell netfilter to forward connections to given ports to another address/port.</p>"
+    "<p>This is using netfilter's DNAT functionality - incoming redirects go in the prerouting chain,"
+    "outgoing redirects go in the output chain.</p>"
+    "<p>The destination should be of the from destination.computer.ip.address:destinationPort</p>"), this);
+  m_forwardsPage->show();
+  this->addPage(m_forwardsPage, i18n("Port Forwarding"));
+  
   setupFMasqueradingPage();
   setupIDefensiveChecksPage();
   finishedPage = new textPage(i18n(
@@ -137,38 +145,6 @@ void kiptablesgenerator::slotDistroChanged(int distro)
       currentOS = BSD;
     	break;
 	}
-}
-
-void kiptablesgenerator::setupFForwardingPage()
-{
-  fForwardingPage = new QFrame(this);
-  
-  QGridLayout *layout = new QGridLayout(fForwardingPage, 4, 2);
-  layout->setSpacing(KDialogBase::spacingHint());
-  
-  QLabel *label = new QLabel(i18n(
-    "<p>If you wish to enable TCP forwarding for any ports (incoming or outgoing) add them to this page.</p>"),
-    fForwardingPage);
-  label->show();
-  layout->addMultiCellWidget(label, 0, 0, 0, 1);
-  
-  KListView *ports = new KListView(fForwardingPage);
-  ports->addColumn(i18n("In/Out"));
-  ports->addColumn(i18n("Port"));
-  ports->addColumn(i18n("Destination"));
-  ports->show();
-  namedWidgets["forwardsList"] = ports;
-  layout->addMultiCellWidget(ports, 1, 3, 0, 0);
-  
-  KPushButton *addForward = new KPushButton(i18n("Add..."), fForwardingPage);
-  layout->addWidget(addForward, 1, 1);
-  connect( addForward, SIGNAL(clicked()), this, SLOT(slotShowForwardDialog()));
-  
-  KPushButton *delForward = new KPushButton(i18n("Remove"), fForwardingPage);
-  layout->addWidget(delForward, 2, 1);
-  connect( delForward, SIGNAL(clicked()), this, SLOT(slotDelForward()));
-  
-  this->addPage(fForwardingPage, i18n("Port Forwarding"));
 }
 
 void kiptablesgenerator::setupFMasqueradingPage()
@@ -292,96 +268,12 @@ void kiptablesgenerator::makeScript(QString &rulesList, QString &undoList, int d
   connect(rulesDialog, SIGNAL(closeClicked()), this, SLOT(slotShownRules()));
 }
 
-void kiptablesgenerator::setupNewForwardDialog()
-{
-  newForwardDialog = new KDialogBase(this, 0, true, i18n("Add Forward"), KDialogBase::Ok | KDialogBase::Cancel);
-  
-  QFrame *dialogArea = new QFrame(newForwardDialog);
-  QGridLayout *layout = new QGridLayout(dialogArea, 4, 2);
-  layout->setSpacing(KDialogBase::spacingHint());
-  
-  KActiveLabel *intro = new KActiveLabel(i18n(
-      "<p><i>Advanced users only</i></p>"
-      "<p>Here you can tell netfilter to forward connections to given ports to another address/port.</p>"
-      "<p>This is using netfilter's DNAT functionality - incoming redirects go in the prerouting chain,"
-      "outgoing redirects go in the output chain.</p>"
-      "<p>The destination should be of the from destination.computer.ip.address:destinationPort</p>"), dialogArea);
-  intro->show();
-  layout->addMultiCellWidget(intro, 0, 0, 0, 1);
-  
-  QButtonGroup *direction = new QButtonGroup(dialogArea);
-  direction->hide();
-  
-  QRadioButton *incoming = new QRadioButton(i18n("&Incoming"), dialogArea);
-  incoming->setChecked(true);
-  incoming->show();
-  layout->addWidget(incoming, 1, 0);
-  namedWidgets["forward_incoming"] = incoming;
-  direction->insert(incoming);
-  
-  QRadioButton *outgoing = new QRadioButton(i18n("&Outgoing"), dialogArea);
-  outgoing->show();
-  layout->addWidget(outgoing, 1, 1);
-  direction->insert(outgoing);
-  
-  QLabel *label = new QLabel(i18n("Port:"), dialogArea);
-  label->show();
-  layout->addWidget(label, 2, 0);
-  
-  KLineEdit *port = new KLineEdit(dialogArea);
-  port->show();
-  layout->addWidget(port, 2, 1);
-  namedWidgets["forward_port"] = port;
-  
-  label = new QLabel(i18n("Destination:"), dialogArea);
-  label->show();
-  layout->addWidget(label, 3, 0);
-  
-  KLineEdit *destination = new KLineEdit(dialogArea);
-  destination->show();
-  layout->addWidget(destination, 3, 1);
-  namedWidgets["forward_destination"] = destination;
- 
-
-  connect(newForwardDialog, SIGNAL(okClicked()), this, SLOT(slotAddForward()));
-  
-  dialogArea->show();
-  newForwardDialog->setMainWidget(dialogArea);
-}
-
-void kiptablesgenerator::slotShowForwardDialog()
-{
-  ((KLineEdit*) namedWidgets["forward_port"])->setText("");
-  ((KLineEdit*) namedWidgets["forward_destination"])->setText("");
-  ((QRadioButton*) namedWidgets["forward_incoming"])->setChecked(true);
-  
-  newForwardDialog->show();
-}
-
 void kiptablesgenerator::slotMasqueradingEnabled(bool isEnabled)
 {
 	namedWidgets["masqueradeLabel1"]->setEnabled(isEnabled);
 	namedWidgets["masqueradeLabel2"]->setEnabled(isEnabled);
 	namedWidgets["masqueradeIntIfs"]->setEnabled(isEnabled);
 	namedWidgets["masqueradeExtIf"]->setEnabled(isEnabled);
-}
-
-void kiptablesgenerator::slotAddForward()
-{
-  KListView *forwards = (KListView*) namedWidgets["forwardsList"];
-  QString localPort = ((KLineEdit*) namedWidgets["forward_port"])->text();
-  QString destination = ((KLineEdit*) namedWidgets["forward_destination"])->text();
-
-  QString direction;
-  ((QRadioButton*) namedWidgets["forward_incoming"])->isChecked()
-    ? direction = i18n("Incoming")
-    : direction = i18n("Outgoing");
-
-  KListViewItem *item = new KListViewItem(forwards,
-    direction,
-    localPort,
-    destination);
-    item = 0; // stop unused variable warnings
 }
 
 void kiptablesgenerator::setupIDefensiveChecksPage()
@@ -445,13 +337,6 @@ void kiptablesgenerator::setupIDefensiveChecksPage()
   
   iDefensiveChecksPage->show();
   this->addPage(iDefensiveChecksPage, i18n("Defensive Checks"));
-}
-
-void kiptablesgenerator::slotDelForward()
-{
-  QListView* forwards = (QListView*) namedWidgets["forwardsList"];
-  QListViewItem *sel = forwards->selectedItem();
-  if (sel) delete sel;
 }
 
 void kiptablesgenerator::accept()
@@ -608,49 +493,41 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
 
     QValueVector<struct kiptg::Service> services = m_portsPage->getServices();
 
-    for (int i = 0; i < services.count(); i++)
+    for (unsigned int i = 0; i < services.count(); i++)
     {
     	struct Service service = services[i];
-      // columns: portNumber, protoName, action, portName
-      QString
-        portNumber = service.portNumber,
-        protocol = service.protocol,
-        action = service.action,
-        portName = service.portName;
-      
-      action == i18n("Allow") ? action = "ACCEPT" : action = "DROP";
-      if ( ! portNumber.contains(",") )
+    	QString action;
+      service.action == i18n("Allow") ? action = "ACCEPT" : action = "DROP";
+      if ( ! service.portNumber.contains(",") )
       {
-        if (protocol == i18n("TCP & UDP") || protocol == i18n("TCP"))
-          rulesList += QString("$IPTABLES -A INPUT -p tcp -m tcp --dport %1 -j %2\n").arg(portNumber).arg(action);
-        if (protocol == i18n("TCP & UDP") || protocol == i18n("UDP"))
-          rulesList += QString("$IPTABLES -A INPUT -p udp -m udp --dport %1 -j %2\n").arg(portNumber).arg(action);
+        if (service.protocol == i18n("TCP & UDP") || service.protocol == i18n("TCP"))
+          rulesList += QString("$IPTABLES -A INPUT -p tcp -m tcp --dport %1 -j %2\n").arg(service.portNumber).arg(action);
+        if (service.protocol == i18n("TCP & UDP") || service.protocol == i18n("UDP"))
+          rulesList += QString("$IPTABLES -A INPUT -p udp -m udp --dport %1 -j %2\n").arg(service.portNumber).arg(action);
       } else {
-        if (protocol == i18n("TCP & UDP") || protocol == i18n("TCP"))
-          rulesList += QString("$IPTABLES -A INPUT -p tcp -m multiport --dports %1 -j %2\n").arg(portNumber).arg(action);
-        if (protocol == i18n("TCP & UDP") || protocol == i18n("UDP"))
-          rulesList += QString("$IPTABLES -A INPUT -p udp -m multiport --dports %1 -j %2\n").arg(portNumber).arg(action);
+        if (service.protocol == i18n("TCP & UDP") || service.protocol == i18n("TCP"))
+          rulesList += QString("$IPTABLES -A INPUT -p tcp -m multiport --dports %1 -j %2\n").arg(service.portNumber).arg(action);
+        if (service.protocol == i18n("TCP & UDP") || service.protocol == i18n("UDP"))
+          rulesList += QString("$IPTABLES -A INPUT -p udp -m multiport --dports %1 -j %2\n").arg(service.portNumber).arg(action);
       }
-      if (protocol == i18n("ICMP"))
-        rulesList += QString("$IPTABLES -A INPUT -p icmp -m icmp --icmp-type %1 -j %2\n").arg(portName).arg(action);
+      if (service.protocol == i18n("ICMP"))
+        rulesList += QString("$IPTABLES -A INPUT -p icmp -m icmp --icmp-type %1 -j %2\n").arg(service.portName).arg(action);
     }
     
     sections.append(rulesList);
     
     rulesList = "##### Port forwarding #####\n";
 
-    KListView* forwards = (KListView*) namedWidgets["forwardsList"];
-    QListViewItem* forward = forwards->firstChild();
-    while (forward)
+    QValueVector<struct kiptg::Forward> forwards = m_forwardsPage->getForwards();
+    
+    for(unsigned int i = 0; i < forwards.count(); i++)
     {
-      QString
-        direction = forward->text(0),
-        localPort = forward->text(1),
-        destination = forward->text(2);
-      direction == i18n("Incoming")
-        ? rulesList += QString("$IPTABLES -t nat -A PREROUTING -p tcp -m tcp --dport %1 -j DNAT --to %2\n").arg(localPort).arg(destination)
-        : rulesList += QString("$IPTABLES -t nat -A OUTPUT -p tcp -m tcp --dport %1 -j DNAT --to %2\n").arg(localPort).arg(destination);
-      forward = forward->nextSibling();
+    	struct kiptg::Forward forward = forwards[i];
+      forward.direction == kiptg::INCOMING
+        ? rulesList += QString(
+        	"$IPTABLES -t nat -A PREROUTING -p tcp -m tcp --dport %1 -j DNAT --to %2\n").arg(forward.from).arg(forward.to)
+        : rulesList += QString(
+        	"$IPTABLES -t nat -A OUTPUT -p tcp -m tcp --dport %1 -j DNAT --to %2\n").arg(forward.from).arg(forward.to);
     }
   }
   
