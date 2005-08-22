@@ -67,6 +67,7 @@ namespace kiptg
 			portsPage(QString text, QWidget* parent);
 			QValueVector<struct Service> getServices();
     private slots:
+    	void slotServicesChanged();
     	void slotServiceNamedChanged(bool);
     	void slotChangedProtocol(int);
     	void slotShowServiceDialog();

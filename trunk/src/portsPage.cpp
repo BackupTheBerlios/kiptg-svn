@@ -33,6 +33,28 @@
 
 namespace kiptg
 {
+	void portsPage::slotServicesChanged()
+	{
+		QListViewItem *item = m_services->selectedItem();
+		if ( item )
+		{
+			m_delService->setEnabled(true);
+      item->itemAbove()
+      	? m_serviceUp->setEnabled(true)
+      	: m_serviceUp->setEnabled(false);
+			item->itemBelow()
+				? m_serviceDown->setEnabled(true)
+				: m_serviceDown->setEnabled(false);
+    }
+    else
+    {
+    	m_delService->setEnabled(false);
+    	m_serviceUp->setEnabled(false);
+    	m_serviceDown->setEnabled(false);
+    }
+				
+	}
+	
 	QValueVector<struct Service> portsPage::getServices()
 	{
 		QValueVector<struct Service> services;
@@ -114,6 +136,7 @@ namespace kiptg
       action,
       portName);
     item = 0; // stop unused variable warnings
+    
   }
 
 	portsPage::portsPage(QString text, QWidget *parent) : QFrame(parent)
@@ -135,23 +158,27 @@ namespace kiptg
     m_services->setSorting(-1);
     m_services->show();
     layout->addMultiCellWidget(m_services, 1, 5, 0, 0);
+    connect(m_services, SIGNAL(selectionChanged()), this, SLOT(slotServicesChanged()));
     
-    m_addService = new KPushButton(i18n("A&dd Service"), this);
+    m_addService = new KPushButton(i18n("Add Service"), this);
     m_addService->show();
     layout->addWidget(m_addService, 1, 1);
     connect(m_addService, SIGNAL(clicked()), this, SLOT(slotShowServiceDialog()));
     
-    m_delService = new KPushButton(i18n("&Remove Service"), this);
+    m_delService = new KPushButton(i18n("Remove Service"), this);
+    m_delService->setEnabled(false);
     m_delService->show();
     layout->addWidget(m_delService, 2, 1);
     connect(m_delService, SIGNAL(clicked()), this, SLOT(slotDelService()));
     
-    m_serviceUp = new KPushButton(i18n("&Move Up"), this);
+    m_serviceUp = new KPushButton(i18n("Move Up"), this);
+    m_serviceUp->setEnabled(false);
     m_serviceUp->show();
     layout->addWidget(m_serviceUp, 3, 1);
     connect(m_serviceUp, SIGNAL(clicked()), this, SLOT(slotMoveUp()));
     
-    m_serviceDown = new KPushButton(i18n("M&ove Down"), this);
+    m_serviceDown = new KPushButton(i18n("Move Down"), this);
+    m_serviceDown->setEnabled(false);
     m_serviceDown->show();
     layout->addWidget(m_serviceDown, 4, 1);
     connect(m_serviceDown, SIGNAL(clicked()), this, SLOT(slotMoveDown()));

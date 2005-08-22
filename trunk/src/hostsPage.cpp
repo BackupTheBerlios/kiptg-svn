@@ -30,6 +30,15 @@
 
 namespace kiptg
 {
+	void hostsPage::slotSelectionChanged()
+	{
+		QListViewItem *item = m_hosts->selectedItem();
+		if (item)
+			m_del->setEnabled(true);
+    else
+    	m_del->setEnabled(false);
+	}
+	
 	QValueVector<struct Host> hostsPage::getHosts()
 	{
   	QValueVector<struct Host> hosts;
@@ -68,17 +77,20 @@ namespace kiptg
     m_hosts->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Ignored);
     m_hosts->show();
     layout->addMultiCellWidget(m_hosts, 1, 3, 0, 0);
+    connect(m_hosts, SIGNAL(selectionChanged()), this, SLOT(slotSelectionChanged())); 
     
-    KPushButton *addHost = new KPushButton(i18n("Add..."), this);
-    addHost->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-    addHost->show();
-    layout->addWidget(addHost, 1, 1);
-    connect( addHost, SIGNAL(clicked()), this, SLOT(slotShowHostDialog()));
+    m_add = new KPushButton(i18n("Add Host"), this);
+    m_add->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    m_add->show();
+    layout->addWidget(m_add, 1, 1);
+    connect(m_add, SIGNAL(clicked()), this, SLOT(slotShowHostDialog()));
     
-    KPushButton *delHost = new KPushButton(i18n("Remove"), this);
-    delHost->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-    layout->addWidget(delHost, 2, 1);
-    connect( delHost, SIGNAL(clicked()), this, SLOT(slotDel()));
+    m_del = new KPushButton(i18n("Remove Host"), this);
+    m_del->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    m_del->setEnabled(false);
+    m_del->show();
+    layout->addWidget(m_del, 2, 1);
+    connect(m_del, SIGNAL(clicked()), this, SLOT(slotDel()));
     
     layout->addItem(new QSpacerItem(QSizePolicy::Minimum, QSizePolicy::Ignored), 3, 1);
     layout->setColStretch(0, 1);

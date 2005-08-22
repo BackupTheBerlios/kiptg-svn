@@ -29,6 +29,7 @@
 #include <kdialogbase.h>
 #include <klineedit.h>
 #include <klistview.h>
+#include <kpushbutton.h>
 
 #include "constants.h"
 
@@ -53,9 +54,13 @@ namespace kiptg
 			QRadioButton *m_forwardIncoming;
 			QRadioButton *m_forwardOutgoing;
 			
+			KPushButton *m_add;
+			KPushButton *m_del;
+			
 			KLineEdit *m_forwardPort;
 			KLineEdit *m_forwardTo;
     private slots:
+    	void slotSelectionChanged();
     	void slotShowForwardDialog();
     	void slotAdd();
     	void slotDel();

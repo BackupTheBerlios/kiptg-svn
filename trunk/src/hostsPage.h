@@ -29,6 +29,7 @@
 #include <kdialogbase.h>
 #include <klineedit.h>
 #include <klistview.h>
+#include <kpushbutton.h>
 
 namespace kiptg
 {
@@ -48,6 +49,9 @@ namespace kiptg
   		
   		KDialogBase *m_newHostDialog;
   		
+  		KPushButton *m_add;
+  		KPushButton *m_del;
+  		
   		QRadioButton *m_hostUseIP;
   		QRadioButton *m_hostUseMAC;
   		QRadioButton *m_hostAllow;
@@ -55,6 +59,7 @@ namespace kiptg
   		KLineEdit *m_hostAddress;
   	private slots:
   		void slotShowHostDialog();
+  		void slotSelectionChanged();
   		void slotAdd();
   		void slotDel();
     public:

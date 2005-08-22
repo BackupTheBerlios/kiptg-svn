@@ -26,10 +26,18 @@
 
 #include <kactivelabel.h>
 #include <klocale.h>
-#include <kpushbutton.h>
 
 namespace kiptg
 {
+	void forwardingPage::slotSelectionChanged()
+	{
+		QListViewItem *item = m_forwards->selectedItem();
+		if ( item )
+			m_del->setEnabled(true);
+    else
+    	m_del->setEnabled(false);	
+	}
+	
 	QValueVector<struct Forward> forwardingPage::getForwards()
 	{
 		QValueVector<struct Forward> forwards;
@@ -65,14 +73,18 @@ namespace kiptg
     m_forwards->addColumn(i18n("Destination"));
     m_forwards->show();
     layout->addMultiCellWidget(m_forwards, 1, 3, 0, 0);
+    connect(m_forwards, SIGNAL(selectionChanged()), this, SLOT(slotSelectionChanged()));
     
-    KPushButton *addForward = new KPushButton(i18n("Add..."), this);
-    layout->addWidget(addForward, 1, 1);
-    connect( addForward, SIGNAL(clicked()), this, SLOT(slotShowForwardDialog()));
+    m_add = new KPushButton(i18n("Add Port"), this);
+    m_add->show();
+    layout->addWidget(m_add, 1, 1);
+    connect(m_add, SIGNAL(clicked()), this, SLOT(slotShowForwardDialog()));
     
-    KPushButton *delForward = new KPushButton(i18n("Remove"), this);
-    layout->addWidget(delForward, 2, 1);
-    connect( delForward, SIGNAL(clicked()), this, SLOT(slotDel()));
+    m_del = new KPushButton(i18n("Remove Port"), this);
+    m_del->show();
+    m_del->setEnabled(false);
+    layout->addWidget(m_del, 2, 1);
+    connect(m_del, SIGNAL(clicked()), this, SLOT(slotDel()));
     
     layout->setColStretch(0, 1);
 	}
