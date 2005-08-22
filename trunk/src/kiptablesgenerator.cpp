@@ -109,14 +109,17 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
   m_forwardsPage->show();
   this->addPage(m_forwardsPage, i18n("Port Forwarding"));
   
-  setupFMasqueradingPage();
+  m_masqueradingPage = new masqueradingPage(this);
+  m_masqueradingPage->show();
+  this->addPage(m_masqueradingPage, i18n("Masquerading"));
+  
   setupIDefensiveChecksPage();
-  finishedPage = new textPage(i18n(
+  m_finishedPage = new textPage(i18n(
     "<p><b>Congratulations!</b></p>"
     "<p>All the information required to create your firewall rules has been collected. "
     "Please finish the wizard to generate your firewall script.</p>"), this);
-  this->addPage(finishedPage, i18n("Finished"));
-  setFinishEnabled(finishedPage, true);
+  this->addPage(m_finishedPage, i18n("Finished"));
+  setFinishEnabled(m_finishedPage, true);
   helpButton()->hide();
 }
 
@@ -145,69 +148,6 @@ void kiptablesgenerator::slotDistroChanged(int distro)
       currentOS = BSD;
     	break;
 	}
-}
-
-void kiptablesgenerator::setupFMasqueradingPage()
-{
-  char ifBuffer[IFNAMSIZ];
-	fMasqueradingPage = new QFrame(this);
-	
-	QGridLayout *layout = new QGridLayout(fMasqueradingPage, 6,2);
-	layout->setSpacing(KDialogBase::spacingHint());
-	
-	KActiveLabel *label = new KActiveLabel(i18n("<p>Do you wish to setup masquerading?</p>"
-		"<p><i>Note: Some operating systems "
-		"call masquerading 'internet connection sharing'.</i></p>"), fMasqueradingPage);
-  label->show();
-  layout->addMultiCellWidget(label, 0, 0, 0, 1);
-  
-  QButtonGroup *optYesNo = new QButtonGroup(fMasqueradingPage);
-  optYesNo->hide();
-  
-  QRadioButton *optYes = new QRadioButton(i18n("&Yes"), fMasqueradingPage);
-  optYes->show();
-  layout->addWidget(optYes, 1, 0);
-  namedWidgets["masqueradeBool"] = optYes;
-  connect(optYes, SIGNAL(toggled(bool )), this, SLOT(slotMasqueradingEnabled(bool)));
-  optYesNo->insert(optYes);
-  
-  QRadioButton *optNo = new QRadioButton(i18n("&No"), fMasqueradingPage);
-  optNo->setChecked(true); // people will know if they want this on, secure defaults
-  optNo->show();
-  layout->addWidget(optNo, 1, 1);
-  optYesNo->insert(optNo);
-  
-  label = new KActiveLabel(i18n("<p>Please select your external interface; this generally means the interface for your internet connection.</p>"),
-  	fMasqueradingPage);
-  label->show();
-  layout->addMultiCellWidget(label, 2, 2, 0, 1);
-  namedWidgets["masqueradeLabel1"] = label;
-  
-  KComboBox *extIfList = new KComboBox(fMasqueradingPage);
-  for (unsigned int i = 1; if_indextoname(i, ifBuffer) != NULL; i++)
-		if ((QString)ifBuffer != "lo") extIfList->insertItem((QString)ifBuffer);
-  extIfList->show();
-  layout->addMultiCellWidget(extIfList, 3, 3, 0, 1);
-  namedWidgets["masqueradeExtIf"] = extIfList;
-  
-	label = new KActiveLabel(i18n("<p>Please select the interfaces which should have access to the external interface.</p>"),
-		fMasqueradingPage);
-  label->show();
-  layout->addMultiCellWidget(label, 4, 4, 0, 1);
-  namedWidgets["masqueradeLabel2"] = label;
-  
-  KListBox *intIfList = new KListBox(fMasqueradingPage);
-  for (unsigned int i = 1; if_indextoname(i, ifBuffer) != NULL; i++)
-  	if((QString)ifBuffer != "lo") intIfList->insertItem((QString)ifBuffer);
-  intIfList->show();
-  layout->addMultiCellWidget(intIfList, 5, 5, 0, 1);
-  namedWidgets["masqueradeIntIfs"] = intIfList;
-  intIfList->setSelectionMode(QListBox::Multi);
-  
-  slotMasqueradingEnabled(false);
-  
-  fMasqueradingPage->show();
-  this->addPage(fMasqueradingPage, i18n("Masquerading"));
 }
 
 void kiptablesgenerator::makeScript(QString &rulesList, QString &undoList, int distro)
@@ -266,14 +206,6 @@ void kiptablesgenerator::makeScript(QString &rulesList, QString &undoList, int d
   rulesDialog = new RulesDialog(this,(char*) 0, &output);
   rulesDialog->show();
   connect(rulesDialog, SIGNAL(closeClicked()), this, SLOT(slotShownRules()));
-}
-
-void kiptablesgenerator::slotMasqueradingEnabled(bool isEnabled)
-{
-	namedWidgets["masqueradeLabel1"]->setEnabled(isEnabled);
-	namedWidgets["masqueradeLabel2"]->setEnabled(isEnabled);
-	namedWidgets["masqueradeIntIfs"]->setEnabled(isEnabled);
-	namedWidgets["masqueradeExtIf"]->setEnabled(isEnabled);
 }
 
 void kiptablesgenerator::setupIDefensiveChecksPage()
@@ -533,16 +465,10 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
   
   sections.append(rulesList);
   
-  if ( ((QRadioButton*)namedWidgets["masqueradeBool"])->isChecked() )
+  if ( m_masqueradingPage->masqEnabled() )
   {
   	rulesList = "##### IP Masquerading (internet connection sharing) #####\n";
-  	KListBox *mIntIfs = ((KListBox*)namedWidgets["masqueradeIntIfs"]);
-    QStringList qslIntIfs;
-    
-    for (unsigned int i = 0; i < mIntIfs->count(); i++)
-    	if ( mIntIfs->isSelected(i) )
-    		qslIntIfs.append(mIntIfs->item(i)->text());
-    	
+
   	rulesList += QString(
     	"# external interface (connected to the internet)\n"
     	"EXT_IF=\"%1\"\n"
@@ -558,9 +484,7 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
       "$IPTABLES -t nat -F POSTROUTING\n"
       "$IPTABLES -t nat -A POSTROUTING -o $EXT_IF -j MASQUERADE\n"
       "# Enable IP packet forwarding\n"
-      "echo 1 > /proc/sys/net/ipv4/ip_forward\n").arg(
-      	((KComboBox*)namedWidgets["masqueradeExtIf"])->currentText()).arg(
-      	qslIntIfs.join(" ") );
+      "echo 1 > /proc/sys/net/ipv4/ip_forward\n").arg(m_masqueradingPage->extIf()).arg(m_masqueradingPage->intIfs().join(" ") );
     undoList += QString(
     	"$IPTABLES -t nat -F POSTROUTING\n"
     	"echo 0 > /proc/sys/net/ipv4/ip_forward\n");
@@ -577,7 +501,6 @@ void kiptablesgenerator::slotShownRules()
 kiptablesgenerator::~kiptablesgenerator()
 {
   delete iDefensiveChecksPage;
-  delete finishedPage;
 }
 
 

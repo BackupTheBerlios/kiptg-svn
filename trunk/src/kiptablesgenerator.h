@@ -36,6 +36,7 @@
 #include "forwardingPage.h"
 #include "hostsPage.h"
 #include "interfacesPage.h"
+#include "masqueradingPage.h"
 #include "policyPage.h"
 #include "portsPage.h"
 #include "textPage.h"
@@ -64,16 +65,13 @@ private:
   kiptg::portsPage *m_portsPage;
   kiptg::hostsPage *m_hostsPage;
   kiptg::forwardingPage *m_forwardsPage;
-  QFrame *fMasqueradingPage;
+  kiptg::masqueradingPage *m_masqueradingPage;
   QFrame *iDefensiveChecksPage;
-  kiptg::textPage *finishedPage;
+  kiptg::textPage *m_finishedPage;
 
   RulesDialog* rulesDialog;
 
-  void setupIHostsPage();
   void setupIDefensiveChecksPage();
-  void setupFMasqueradingPage();
-  
 public:
   kiptablesgenerator(QWidget *parent = 0, const char *name = 0);
 
@@ -85,7 +83,6 @@ protected:
 	void linuxOutput(QString &rulesList, QString &undoList);
 protected slots:
   void slotShownRules();
-  void slotMasqueradingEnabled(bool);
   void slotDistroChanged(int);
   virtual void accept();
 };

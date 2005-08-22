@@ -73,6 +73,8 @@ namespace kiptg
     KPushButton *delForward = new KPushButton(i18n("Remove"), this);
     layout->addWidget(delForward, 2, 1);
     connect( delForward, SIGNAL(clicked()), this, SLOT(slotDel()));
+    
+    layout->setColStretch(0, 1);
 	}
 	
   void forwardingPage::slotDel()
