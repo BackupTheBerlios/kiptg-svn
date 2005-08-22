@@ -38,7 +38,7 @@ namespace kiptg
   	QCheckBox *m_udpEST, *m_udpREL, *m_udpNEW;
   	QCheckBox *m_icmpEST, *m_icmpREL, *m_icmpNEW;
   public:
-  	conntrackPage::conntrackPage(QWidget* parent);
+  	conntrackPage::conntrackPage(QWidget *parent);
   	bool allSame();
   	int getAll(); // these return the kiptg::ctstate enum
   	int getTCP();

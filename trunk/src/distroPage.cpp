@@ -30,7 +30,7 @@
 
 namespace kiptg
 {
-	distroPage::distroPage(QWidget* parent) : QFrame(parent)
+	distroPage::distroPage(QWidget *parent) : QFrame(parent)
 	{
 		QVBoxLayout *layout = new QVBoxLayout(this);
   	layout->setSpacing(KDialogBase::spacingHint());

@@ -33,7 +33,7 @@ namespace kiptg
 		private:
 			KComboBox *m_distroList;
 		public:
-			distroPage(QWidget* parent);
+			distroPage(QWidget *parent);
 			int getDistro();
     signals:
     	void distroChanged(int newDistro);
