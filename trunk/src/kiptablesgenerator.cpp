@@ -113,7 +113,10 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
   m_masqueradingPage->show();
   this->addPage(m_masqueradingPage, i18n("Masquerading"));
   
-  setupIDefensiveChecksPage();
+  m_defensiveChecksPage = new defensiveChecksPage(this);
+  m_defensiveChecksPage->show();
+  this->addPage(m_defensiveChecksPage, i18n("Defensive Checks"));
+
   m_finishedPage = new textPage(i18n(
     "<p><b>Congratulations!</b></p>"
     "<p>All the information required to create your firewall rules has been collected. "
@@ -208,69 +211,6 @@ void kiptablesgenerator::makeScript(QString &rulesList, QString &undoList, int d
   connect(rulesDialog, SIGNAL(closeClicked()), this, SLOT(slotShownRules()));
 }
 
-void kiptablesgenerator::setupIDefensiveChecksPage()
-{
-  iDefensiveChecksPage = new QFrame(this);
-  
-  QVBoxLayout *layout = new QVBoxLayout(iDefensiveChecksPage);
-  layout->setSpacing(KDialogBase::spacingHint());
-  
-  KActiveLabel *summary = new KActiveLabel(i18n(
-    "<p>This page allows you to enable additional checks to help protect your system "
-    "from common firewall evasion techniques, DOS attacks, and other malicious activities.</p>"
-    "<p>If you don't understand the above, the defaults provided are suitable for most systems.</p>"),
-    iDefensiveChecksPage);
-  summary->show();
-  layout->addWidget(summary);
-  
-  QCheckBox *localSpoof = new QCheckBox(i18n("&Block spoofed packets"), iDefensiveChecksPage);
-  localSpoof->setChecked(true);
-  localSpoof->show();
-  layout->addWidget(localSpoof);
-  namedWidgets["iCheckLocalSpoof"] = localSpoof;
-  
-  QCheckBox *synFlood = new QCheckBox(i18n("&SYN-flood protection"), iDefensiveChecksPage);
-  synFlood->setChecked(true);
-  synFlood->show();
-  layout->addWidget(synFlood);
-  namedWidgets["iSynFloodProtect"] = synFlood;
-  
-  QCheckBox *checkSyn = new QCheckBox(i18n("&Check new connections start with a SYN packet"), iDefensiveChecksPage);
-  checkSyn->setChecked(true);
-  checkSyn->show();
-  layout->addWidget(checkSyn);
-  namedWidgets["iCheckSyn"] = checkSyn;
-  
-  QCheckBox *checkSynFin = new QCheckBox(i18n("&Drop packets with both SYN and FIN flags set"), iDefensiveChecksPage);
-  checkSynFin->setChecked(true);
-  checkSynFin->show();
-  layout->addWidget(checkSynFin);
-  namedWidgets["iCheckSynFin"] = checkSynFin;
-  
-  QCheckBox *sysctlSmurf = new QCheckBox(i18n("&Ignore ICMP echo broadcasts (helps protect against smurf attacks)"), iDefensiveChecksPage);
-  sysctlSmurf->setChecked(true);
-  sysctlSmurf->show();
-  layout->addWidget(sysctlSmurf);
-  namedWidgets["sysctlSmurf"] = sysctlSmurf;
-  
-  QCheckBox *sysctlIgnoreRedirects = new QCheckBox(i18n("I&gnore ICMP redirects"), iDefensiveChecksPage);
-  sysctlIgnoreRedirects->setChecked(true);
-  sysctlIgnoreRedirects->show();
-  layout->addWidget(sysctlIgnoreRedirects);
-  namedWidgets["sysctlIgnoreRedirects"] = sysctlIgnoreRedirects;
-  
-  QCheckBox *sysctlIgnoreSourceRouted = new QCheckBox(i18n("Ig&nore packets that use IP source routing"), iDefensiveChecksPage);
-  sysctlIgnoreSourceRouted->setChecked(true);
-  sysctlIgnoreSourceRouted->show();
-  layout->addWidget(sysctlIgnoreSourceRouted);
-  namedWidgets["sysctlIgnoreSourceRouted"] = sysctlIgnoreSourceRouted;
-  
-  layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Ignored, QSizePolicy::Ignored));
-  
-  iDefensiveChecksPage->show();
-  this->addPage(iDefensiveChecksPage, i18n("Defensive Checks"));
-}
-
 void kiptablesgenerator::accept()
 {
   QString rulesList, undoList;
@@ -320,9 +260,9 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
     
     rulesList = "##### Assorted defensive checks #####\n";
  
-    if (((QCheckBox *) namedWidgets["iCheckLocalSpoof"])->isChecked())
+    if (m_defensiveChecksPage->blockSpoofed())
       rulesList += "$IPTABLES -A INPUT ! -i lo -d 127.0.0.0/8 -j DROP\n";
-    if (((QCheckBox *) namedWidgets["iSynFloodProtect"])->isChecked())
+    if (m_defensiveChecksPage->blockSynFlood())
     {
       rulesList += "$IPTABLES -N Flood-Scan\n";
       rulesList += "$IPTABLES -A INPUT -p tcp -m tcp --syn -j Flood-Scan\n";
@@ -330,16 +270,16 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
       rulesList += "$IPTABLES -A Flood-Scan -j DROP\n";
       undoList += "$IPTABLES -X Flood-Scan\n";
     }
-    if (((QCheckBox *) namedWidgets["iCheckSyn"])->isChecked())
+    if (m_defensiveChecksPage->checkNewSyn())
       rulesList += "$IPTABLES -A INPUT -p tcp -m tcp ! --syn -m conntrack --ctstate NEW -j DROP\n";
-    if (((QCheckBox *) namedWidgets["iCheckSynFin"])->isChecked())
+    if (m_defensiveChecksPage->blockSynFin())
       rulesList += "$IPTABLES -A INPUT -p tcp -m tcp --tcp-flags SYN,FIN SYN,FIN -j DROP\n";
       
   	sections.append(rulesList);
   	
   	rulesList = "##### sysctl-based defenses #####\n";
   	
-  	if (((QCheckBox *) namedWidgets["iCheckLocalSpoof"])->isChecked())
+  	if (m_defensiveChecksPage->blockSpoofed())
   	{
     	rulesList += "# Help protect against spoofing\n"
     		"for i in /proc/sys/net/ipv4/conf/*/rp_filter; do\n"
@@ -350,14 +290,14 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
         "\t echo 0 > $i; \n"
         "done\n";
   	}
-    if (((QCheckBox *) namedWidgets["sysctlSmurf"])->isChecked())
+    if (m_defensiveChecksPage->blockEchoBroadcasts())
     {
     	rulesList +=
     		"# don't participate in smurf attacks\n"
     		"echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_broadcasts\n";
     	undoList += "echo 0 > /proc/sys/net/ipv4/icmp_echo_ignore_broadcasts\n";
     }
-    if (((QCheckBox *) namedWidgets["sysctlIgnoreRedirects"])->isChecked())
+    if (m_defensiveChecksPage->ignoreRedirects())
     {
     	rulesList +=
     		"# Ignore ICMP redirects\n"
@@ -369,7 +309,7 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
         "\techo 1 > $i;\n"
         "done\n";
     }
-    if (((QCheckBox *) namedWidgets["sysctlIgnoreSourceRouted"])->isChecked())
+    if (m_defensiveChecksPage->blockSourceRouted())
     {
     	rulesList +=
     		"# Ignore packets with source routing\n"
@@ -497,11 +437,5 @@ void kiptablesgenerator::slotShownRules()
 {
   QDialog::accept();
 }
-
-kiptablesgenerator::~kiptablesgenerator()
-{
-  delete iDefensiveChecksPage;
-}
-
 
 #include "kiptablesgenerator.moc"

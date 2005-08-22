@@ -32,6 +32,7 @@
 
 #include "constants.h"
 #include "conntrackPage.h"
+#include "defensiveChecksPage.h"
 #include "distroPage.h"
 #include "forwardingPage.h"
 #include "hostsPage.h"
@@ -66,16 +67,14 @@ private:
   kiptg::hostsPage *m_hostsPage;
   kiptg::forwardingPage *m_forwardsPage;
   kiptg::masqueradingPage *m_masqueradingPage;
-  QFrame *iDefensiveChecksPage;
+  kiptg::defensiveChecksPage *m_defensiveChecksPage;
   kiptg::textPage *m_finishedPage;
 
   RulesDialog* rulesDialog;
 
-  void setupIDefensiveChecksPage();
 public:
   kiptablesgenerator(QWidget *parent = 0, const char *name = 0);
 
-  ~kiptablesgenerator();
   void makeScript(QString &rulesList, QString &undoList, int distro);
 protected:
 	QPtrList<QWidget> linuxOnlyWidgets;
