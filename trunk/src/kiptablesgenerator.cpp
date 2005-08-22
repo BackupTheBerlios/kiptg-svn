@@ -116,19 +116,11 @@ void kiptablesgenerator::slotDistroChanged(int distro)
 		case GENTOO:
 			if ( currentOS == LINUX )
 				return;
-      for ( unsigned int i = 0; i < linuxOnlyPages.count(); i++)
-      	setAppropriate(linuxOnlyPages.at(i), true);
-      for ( unsigned int i = 0; i < linuxOnlyWidgets.count(); i++)
-      	linuxOnlyWidgets.at(i)->setEnabled(true);
       currentOS = LINUX;
 			break;
     default: // BSD
     	if ( currentOS == BSD )
     		return;
-      for ( unsigned int i = 0; i < linuxOnlyPages.count(); i++)
-      	setAppropriate(linuxOnlyPages.at(i), false);
-      for ( unsigned int i = 0; i < linuxOnlyWidgets.count(); i++)
-      	linuxOnlyWidgets.at(i)->setEnabled(false);
       currentOS = BSD;
     	break;
 	}

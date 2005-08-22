@@ -69,9 +69,7 @@ public:
   kiptablesgenerator(QWidget *parent = 0, const char *name = 0);
 
   void makeScript(QString &rulesList, QString &undoList, int distro);
-protected:
-	QPtrList<QWidget> linuxOnlyWidgets;
-	QPtrList<QFrame> linuxOnlyPages;
+private:
 	void linuxOutput(QString &rulesList, QString &undoList);
 protected slots:
   void slotShownRules();
