@@ -19,26 +19,7 @@
  ***************************************************************************/
 #include "kiptablesgenerator.h"
 
-#include <netdb.h>
-#include <netinet/in.h>
-#include <net/if.h>
-
-#include <qbuttongroup.h>
-#include <qcheckbox.h>
-#include <qdialog.h>
-#include <qlabel.h>
-#include <qlayout.h>
-#include <qradiobutton.h>
-
-#include <kactivelabel.h>
-#include <kcombobox.h>
-#include <kinputdialog.h>
-#include <klineedit.h>
-#include <klistbox.h>
-#include <klistview.h>
 #include <klocale.h>
-#include <kpushbutton.h>
-#include <kseparator.h>
 
 #include "constants.h"
 using namespace kiptg;

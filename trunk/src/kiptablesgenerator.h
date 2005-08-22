@@ -21,12 +21,8 @@
 #define KIPTABLESGENERATOR_H
 
 
-#include <qframe.h>
-#include <qmap.h>
 #include <qptrlist.h>
 #include <qstring.h>
-#include <qstringlist.h>
-#include <qwidget.h>
 
 #include <kwizard.h>
 
@@ -53,9 +49,6 @@ class kiptablesgenerator : public KWizard
 Q_OBJECT
 private:
   kiptg::os currentOS;
-  
-  QStringList mRules;
-  QMap<QString, QWidget*> namedWidgets;
   
   kiptg::textPage *m_welcomePage;
   kiptg::distroPage *m_distroPage;
