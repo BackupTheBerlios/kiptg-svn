@@ -20,9 +20,6 @@
 
 #include "portsPage.h"
 
-#include <netdb.h>
-#include <netinet/in.h>
-
 #include <qbuttongroup.h>
 #include <qlabel.h>
 #include <qlayout.h>
@@ -87,61 +84,35 @@ namespace kiptg
   
     if (sel  && ibelow)
       sel->moveItem(ibelow); //Move the Item
+    slotServicesChanged();
 	}
 	
 	void portsPage::slotMoveUp()
 	{
-    QListViewItem *sel = m_services->selectedItem(), *iabove = 0;
+    QListViewItem *sel = m_services->selectedItem();
     
-    if (sel)
-      iabove=sel->itemAbove(); // Only check itemAbove() if it exists...
-  
-    if (sel  && iabove)
-      iabove->moveItem(sel); //Move the Item
+    if (sel->itemAbove())
+    	sel->itemAbove()->moveItem(sel);
+    slotServicesChanged();
   }
   
   void portsPage::slotAddService()
   {
-    QString protoName = m_serviceProtocols->currentText();
-    QString portName, portNumber;
-    QString action;
-    m_serviceAccept->isChecked()
-      ? action = i18n("Allow")
-      : action = i18n("Deny");
-    
-    if (protoName != i18n("ICMP"))
-    {
-      if (m_serviceNamed->isChecked())
-      {
-        portName = m_serviceNames->currentText();
-        struct servent *service;
-        service = getservbyname(portName.lower().ascii(), NULL);
-        portNumber = QString::number(ntohs(service->s_port));
-      }
-      else
-      {
-        portName = "";
-        portNumber = m_serviceNumbers->text();
-      }
-    }
-    else
-    {
-      portNumber = "";
-      portName = m_serviceNames->currentText().stripWhiteSpace();
-    }
+    struct kiptg::Service service = m_newServiceDialog->getService();
     
     QListViewItem *item = new QListViewItem(m_services,
-      portNumber,
-      protoName,
-      action,
-      portName);
+      service.portNumber,
+      service.protocol,
+      service.action,
+      service.portName);
     item = 0; // stop unused variable warnings
     
   }
 
 	portsPage::portsPage(QString text, QWidget *parent) : QFrame(parent)
 	{
-		setupNewServiceDialog();
+		m_newServiceDialog = new newServiceDialog(this);
+		connect(m_newServiceDialog, SIGNAL(okClicked()), this, SLOT(slotAddService()));
 		
     QGridLayout *layout = new QGridLayout(this, 6, 2);
     layout->setSpacing(KDialogBase::spacingHint());
@@ -163,7 +134,7 @@ namespace kiptg
     m_addService = new KPushButton(i18n("Add Service"), this);
     m_addService->show();
     layout->addWidget(m_addService, 1, 1);
-    connect(m_addService, SIGNAL(clicked()), this, SLOT(slotShowServiceDialog()));
+    connect(m_addService, SIGNAL(clicked()), m_newServiceDialog, SLOT(show()));
     
     m_delService = new KPushButton(i18n("Remove Service"), this);
     m_delService->setEnabled(false);
@@ -185,176 +156,6 @@ namespace kiptg
     
     layout->setColStretch(0, 1);
 	}
-	
-  void portsPage::slotShowServiceDialog()
-  {
-    // Reset dialog
-    m_serviceProtocols->setCurrentItem(0);
-    slotChangedProtocol(0);
-    m_serviceNamed->setChecked(true);
-    m_serviceNames->setCurrentItem(0);
-    m_serviceNumbers->setText("");
-    m_serviceAccept->setChecked(true);
-    slotServiceNamedChanged(true);
-  
-    m_newServiceDialog->show();
-  }
 
-  void portsPage::slotServiceNamedChanged(bool named)
-  {
-    m_serviceNames->setEnabled(named);
-    m_serviceNumbers->setEnabled(!named);
-  }
+}	
 
-	void portsPage::setupNewServiceDialog()
-	{
-    m_newServiceDialog = new KDialogBase(this, 0, true, i18n("Add Service"), KDialogBase::Ok | KDialogBase::Cancel);
-    
-    QFrame *dialogArea = new QFrame(m_newServiceDialog);
-    QGridLayout *layout = new QGridLayout(dialogArea, 7, 2);
-    layout->setSpacing(KDialogBase::spacingHint());
-    
-    KActiveLabel *intro = new KActiveLabel(i18n(
-      "<p><i>Advanced users only</i></p>"
-      "<p>Here you can allow or deny access to services through your firewall.<br />"
-      "You can specify a port range in the box using this format: <tt>fromPort:toPort</tt>, "
-      "or you can specify multiple ports by seperating them with commas.</p>"), dialogArea);
-    intro->show();
-    layout->addMultiCellWidget(intro, 0, 0, 0, 1);
-    
-    QLabel *protocolLabel = new QLabel(i18n("&Protocol: "), dialogArea);
-    protocolLabel->show();
-    layout->addWidget(protocolLabel, 1, 0);
-  
-    m_serviceProtocols = new KComboBox(dialogArea);
-    m_serviceProtocols->insertItem(i18n("TCP"));
-    m_serviceProtocols->insertItem(i18n("UDP"));
-    m_serviceProtocols->insertItem(i18n("TCP & UDP"));
-    m_serviceProtocols->insertItem(i18n("ICMP"));
-    m_serviceProtocols->setCurrentItem(2);
-    m_serviceProtocols->show();
-    layout->addWidget(m_serviceProtocols, 1, 1);
-    protocolLabel->setBuddy(m_serviceProtocols);
-    connect(m_serviceProtocols, SIGNAL(activated(int )), this, SLOT(slotChangedProtocol(int )));
-    
-    QLabel *selectByLabel = new QLabel(i18n("Select service by: "), dialogArea);
-    selectByLabel->show();
-    layout->addMultiCellWidget(selectByLabel, 2, 2, 0, 1);
-    
-    QButtonGroup *optNamedOrNumbered = new QButtonGroup(dialogArea);
-    optNamedOrNumbered->hide();
-    
-    m_serviceNamed = new QRadioButton(i18n("&Name: "), dialogArea);
-    m_serviceNamed->setChecked(true);
-    m_serviceNamed->setName("named");
-    optNamedOrNumbered->insert(m_serviceNamed);
-    m_serviceNamed->show();
-    layout->addWidget(m_serviceNamed, 3, 0);
-    connect(m_serviceNamed, SIGNAL(toggled(bool )), this, SLOT(slotServiceNamedChanged(bool )));
-    
-    m_serviceNames = new KComboBox(dialogArea);
-    m_serviceNames->show();
-    layout->addWidget(m_serviceNames, 3, 1);
-    
-    m_serviceNumbered = new QRadioButton(i18n("&Port number(s): "), dialogArea);
-    m_serviceNumbered->setName("numbered");
-    optNamedOrNumbered->insert(m_serviceNumbered);
-    m_serviceNumbered->show();
-    layout->addWidget(m_serviceNumbered, 4, 0);
-    
-    m_serviceNumbers = new KLineEdit(dialogArea);
-    m_serviceNumbers->show();
-    layout->addWidget(m_serviceNumbers, 4, 1);
-    
-    QButtonGroup *optAllowDeny = new QButtonGroup(dialogArea);
-    optAllowDeny->hide();
-    
-    KSeparator *separator = new KSeparator(dialogArea);
-    separator->show();
-    layout->addMultiCellWidget(separator, 5, 5, 0, 1);
-    
-    m_serviceAccept = new QRadioButton(i18n("&Accept"), dialogArea);
-    m_serviceAccept->setName(i18n("Accept"));
-    m_serviceAccept->setChecked(true);
-    m_serviceAccept->show();
-    optAllowDeny->insert(m_serviceAccept);
-    layout->addWidget(m_serviceAccept, 6, 0);
-    
-    m_serviceDrop = new QRadioButton(i18n("&Drop"), dialogArea);
-    m_serviceDrop->setName(i18n("Drop"));
-    m_serviceDrop->show();
-    optAllowDeny->insert(m_serviceDrop);
-    layout->addWidget(m_serviceDrop, 6, 1);
-      
-    dialogArea->show();
-    m_newServiceDialog->setMainWidget(dialogArea);
-    connect(m_newServiceDialog, SIGNAL(okClicked()), this, SLOT(slotAddService()));
-    slotChangedProtocol(2); // TCP+UDP
-	}
-	
-  void portsPage::slotChangedProtocol(int newProtocol)
-  {
-    // 0 = TCP
-    // 1 = UDP
-    // 2 = TCP+UDP
-    // 3 = ICMP
-    m_serviceNames->clear();
-    if (newProtocol != 3)
-    {
-      m_serviceNames->insertItem("SSH");
-      m_serviceNames->insertItem("Telnet");
-      m_serviceNames->insertItem("HTTP");
-      m_serviceNames->insertItem("HTTPS");
-      m_serviceNames->insertItem("SMTP");
-      m_serviceNames->insertItem("SMTPS");
-      m_serviceNames->insertItem("POP3");
-      m_serviceNames->insertItem("POP3S");
-      m_serviceNames->insertItem("IMAP");
-      m_serviceNames->insertItem("IMAPS");
-      m_serviceNumbered->setEnabled(true);
-      if ( m_serviceNumbered->isChecked() )
-      	m_serviceNumbers->setEnabled(true);
-      return;
-    }
-    m_serviceNumbered->setEnabled(false);
-    m_serviceNumbers->setEnabled(false);
-    m_serviceNamed->setChecked(true);
-    m_serviceNames->insertItem("any");
-    m_serviceNames->insertItem("echo-reply");
-    m_serviceNames->insertItem("destination-unreachable");
-    m_serviceNames->insertItem(" network-unreachable");
-    m_serviceNames->insertItem(" host-unreachable");
-    m_serviceNames->insertItem(" protocol-unreachable");
-    m_serviceNames->insertItem(" port-unreachable");
-    m_serviceNames->insertItem(" fragmentation-needed");
-    m_serviceNames->insertItem(" source-route-failed");
-    m_serviceNames->insertItem(" network-unknown");
-    m_serviceNames->insertItem(" host-unknown");
-    m_serviceNames->insertItem(" network-prohibited");
-    m_serviceNames->insertItem(" host-prohibited");
-    m_serviceNames->insertItem(" TOS-network-unreachable");
-    m_serviceNames->insertItem(" TOS-host-unreachable");
-    m_serviceNames->insertItem(" communication-prohibited");
-    m_serviceNames->insertItem(" host-precedence-violation");
-    m_serviceNames->insertItem(" precedence-cutoff");
-    m_serviceNames->insertItem("source-quench");
-    m_serviceNames->insertItem("redirect");
-    m_serviceNames->insertItem(" network-redirect");
-    m_serviceNames->insertItem(" host-redirect");
-    m_serviceNames->insertItem(" TOS-network-redirect");
-    m_serviceNames->insertItem(" TOS-host-redirect");
-    m_serviceNames->insertItem("echo-request");
-    m_serviceNames->insertItem("router-advertisement");
-    m_serviceNames->insertItem("router-solicitation");
-    m_serviceNames->insertItem("time-exceeded");
-    m_serviceNames->insertItem(" ttl-zero-during-transit");
-    m_serviceNames->insertItem(" ttl-zero-during-reassembly");
-    m_serviceNames->insertItem("parameter-problem");
-    m_serviceNames->insertItem(" ip-header-bad");
-    m_serviceNames->insertItem(" required-option-missing");
-    m_serviceNames->insertItem("timestamp-request");
-    m_serviceNames->insertItem("timestamp-reply");
-    m_serviceNames->insertItem("address-mask-request");
-    m_serviceNames->insertItem("address-mask-reply");
-  }
-}

@@ -22,17 +22,13 @@
 #define PORTSPAGE_H
 
 #include <qframe.h>
-#include <qmap.h>
-#include <qradiobutton.h>
 #include <qstring.h>
 #include <qvaluevector.h>
 
-#include <kcombobox.h>
-#include <kdialogbase.h>
-#include <klineedit.h>
 #include <klistview.h>
 #include <kpushbutton.h>
 
+#include "newServiceDialog.h"
 #include "kiptg.h"
 
 namespace kiptg
@@ -41,7 +37,7 @@ namespace kiptg
 	{
 		Q_OBJECT
 		private:
-  		KDialogBase *m_newServiceDialog;
+  		newServiceDialog *m_newServiceDialog;
   		KListView *m_services;
   		
   		KPushButton *m_addService;
@@ -49,25 +45,11 @@ namespace kiptg
   		KPushButton *m_serviceUp;
   		KPushButton *m_serviceDown;
   		
-  		// for new service dialog box
-    	void setupNewServiceDialog();
-  		
-  		KComboBox *m_serviceProtocols;
-  		QRadioButton *m_serviceNamed;
-  		KComboBox *m_serviceNames;
-  		QRadioButton *m_serviceNumbered;
-  		KLineEdit *m_serviceNumbers;
-  		
-  		QRadioButton *m_serviceAccept;
-  		QRadioButton *m_serviceDrop;
 		public:
 			portsPage(QString text, QWidget* parent);
 			QValueVector<struct Service> getServices();
     private slots:
     	void slotServicesChanged();
-    	void slotServiceNamedChanged(bool);
-    	void slotChangedProtocol(int);
-    	void slotShowServiceDialog();
     	void slotAddService();
     	void slotMoveUp();
     	void slotMoveDown();
