@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 by Fred Emmott                                     *
+ *   Copyright (C) 2005 by Fred Emmott                                     *
  *   mail@fredemmott.co.uk                                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
