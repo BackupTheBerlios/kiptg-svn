@@ -26,7 +26,7 @@
 #include <kdialogbase.h>
 #include <klocale.h>
 
-#include "constants.h"
+#include "kiptg.h"
 
 namespace kiptg
 {

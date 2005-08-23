@@ -26,7 +26,7 @@
 
 #include <kwizard.h>
 
-#include "constants.h"
+#include "kiptg.h"
 #include "conntrackPage.h"
 #include "defensiveChecksPage.h"
 #include "distroPage.h"

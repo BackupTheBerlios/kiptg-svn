@@ -31,7 +31,7 @@
 #include <klistview.h>
 #include <kpushbutton.h>
 
-#include "constants.h"
+#include "kiptg.h"
 
 namespace kiptg
 {

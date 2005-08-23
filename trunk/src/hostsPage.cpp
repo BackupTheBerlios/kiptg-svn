@@ -61,7 +61,9 @@ namespace kiptg
 	
 	hostsPage::hostsPage(QString text, QString newHostText, QWidget *parent) : QFrame(parent)
 	{
-		setupNewHostDialog(newHostText);
+		m_newHostDialog = new newHostDialog(newHostText, this);
+    connect(m_newHostDialog, SIGNAL(okClicked()), this, SLOT(slotAdd()));
+		
     QGridLayout *layout = new QGridLayout(this, 4, 2);
     layout->setSpacing(KDialogBase::spacingHint());
     
@@ -98,10 +100,6 @@ namespace kiptg
 	
 	void hostsPage::slotShowHostDialog()
 	{
-    m_hostAllow->setChecked(true);
-    m_hostUseIP->setChecked(true);
-    m_hostAddress->setText("");
-    
     m_newHostDialog->show();
 	}
 	
@@ -113,84 +111,19 @@ namespace kiptg
 	
 	void hostsPage::slotAdd()
 	{
+		struct Host host = m_newHostDialog->getHost();
     QString allowOrBlock, ipOrMAC;
-    m_hostAllow->isChecked()
+    host.accept
       ? allowOrBlock = i18n("Allow")
       : allowOrBlock = i18n("Block");
-    m_hostUseIP->isChecked()
+    host.useIP
       ? ipOrMAC = i18n("IP")
       : ipOrMAC = i18n("MAC");
-    QString host = m_hostAddress->text();
     
     KListViewItem *item = new KListViewItem(m_hosts,
       allowOrBlock,
       ipOrMAC,
-      host);
+      host.address);
     item = 0; //unused variable warnings  
-	}
-	
-	void hostsPage::setupNewHostDialog(QString text)
-	{
-    m_newHostDialog = new KDialogBase(this, 0, true, i18n("Add Host"), KDialogBase::Ok | KDialogBase::Cancel);
-    
-    QFrame *dialogArea = new QFrame(m_newHostDialog);
-    QGridLayout *layout = new QGridLayout(dialogArea, 7, 2);
-    layout->setSpacing(KDialogBase::spacingHint());
-    
-    KActiveLabel *intro = new KActiveLabel(text, dialogArea);
-    intro->show();
-    layout->addMultiCellWidget(intro, 0, 0, 0, 1);
-  
-    QLabel *label = new QLabel(i18n(
-      "<p>Do you wish to specify the host by IP address or MAC (hardware) address?</p>"), dialogArea);
-    label->show();
-    layout->addMultiCellWidget(label, 1, 1, 0, 1);
-  
-    QButtonGroup *ipOrMAC = new QButtonGroup(dialogArea);
-    ipOrMAC->hide();
-    
-    m_hostUseIP = new QRadioButton(i18n("&Use IP"), dialogArea);
-    m_hostUseIP->setChecked(true);
-    m_hostUseIP->show();
-    layout->addWidget(m_hostUseIP, 2, 0);
-    ipOrMAC->insert(m_hostUseIP);
-    
-    m_hostUseMAC = new QRadioButton(i18n("U&se MAC"), dialogArea);
-    m_hostUseMAC->show();
-    layout->addWidget(m_hostUseMAC, 2, 1);
-    ipOrMAC->insert(m_hostUseMAC);
-    
-    label = new QLabel(i18n("<p>Do you want to allow connections from this host, or block them?</p>"), dialogArea);
-    label->show();
-    layout->addMultiCellWidget(label, 3, 3, 0, 1);
-  
-    QButtonGroup *whitelistOrBlacklist = new QButtonGroup(dialogArea);
-    whitelistOrBlacklist->hide();
-    
-    m_hostAllow = new QRadioButton(i18n("&Allow"), dialogArea);
-    m_hostAllow->setChecked(true);
-    m_hostAllow->show();
-    layout->addWidget(m_hostAllow, 4, 0);
-    whitelistOrBlacklist->insert(m_hostAllow);
-    
-    m_hostBlock = new QRadioButton(i18n("&Block"), dialogArea);
-    m_hostBlock->setChecked(false);
-    m_hostBlock->show();
-    layout->addWidget(m_hostBlock, 4, 1);
-    whitelistOrBlacklist->insert(m_hostBlock);
-    
-  
-    KActiveLabel *hostLabel = new KActiveLabel(i18n("Enter the IP or MAC address of the host:"), dialogArea);
-    hostLabel->show();
-    layout->addMultiCellWidget(hostLabel, 5, 5, 0, 1);
-    
-    m_hostAddress = new KLineEdit(dialogArea);
-    m_hostAddress->show();
-    layout->addMultiCellWidget(m_hostAddress, 6, 6, 0, 1);
-    
-    connect(m_newHostDialog, SIGNAL(okClicked()), this, SLOT(slotAdd()));
-    
-    dialogArea->show();
-    m_newHostDialog->setMainWidget(dialogArea);		
 	}
 }

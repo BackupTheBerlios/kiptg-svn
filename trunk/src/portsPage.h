@@ -33,13 +33,10 @@
 #include <klistview.h>
 #include <kpushbutton.h>
 
+#include "kiptg.h"
+
 namespace kiptg
 {
-	struct Service
-	{
-		QString portNumber, protocol, action, portName;
-  };
-  
 	class portsPage : public QFrame
 	{
 		Q_OBJECT

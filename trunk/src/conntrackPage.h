@@ -24,7 +24,7 @@
 #include <qcheckbox.h>
 #include <qframe.h>
 
-#include "constants.h"
+#include "kiptg.h"
 
 namespace kiptg 
 {

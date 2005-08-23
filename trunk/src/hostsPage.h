@@ -31,23 +31,18 @@
 #include <klistview.h>
 #include <kpushbutton.h>
 
+#include "newHostDialog.h"
+#include "kiptg.h"
+
 namespace kiptg
 {
-	struct Host
-	{
-		bool accept;
-		bool useIP;
-		QString address;
-  };
 	class hostsPage : public QFrame
 	{
   	Q_OBJECT
   	private:
-  		void setupNewHostDialog(QString text);
-  		
   		KListView *m_hosts;
   		
-  		KDialogBase *m_newHostDialog;
+  		newHostDialog *m_newHostDialog;
   		
   		KPushButton *m_add;
   		KPushButton *m_del;

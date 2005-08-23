@@ -21,7 +21,7 @@
 
 #include <klocale.h>
 
-#include "constants.h"
+#include "kiptg.h"
 using namespace kiptg;
 
 kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)

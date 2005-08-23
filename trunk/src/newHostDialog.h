@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 by Fred Emmott                                     *
+ *   Copyright (C) 2005 by Fred Emmott                                     *
  *   mail@fredemmott.co.uk                                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,37 +18,33 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
- 
-namespace kiptg 
+#ifndef NEWHOSTDIALOG_H
+#define NEWHOSTDIALOG_H
+
+#include <qradiobutton.h>
+#include <qstring.h>
+
+#include <kdialogbase.h>
+#include <klineedit.h>
+
+#include "kiptg.h"
+
+namespace kiptg
 {
-	enum direction {
-		INCOMING,
-		OUTGOING
-  };
-	enum ctstate {
-		ESTABLISHED = 1,
-		RELATED = 2,
-		NEW = 4
-  };
-	enum policy {
-		ACCEPT,
-		DROP
-  };
-	enum os {
-		LINUX,
-		BSD
-  };
-	enum distros {
-    GENERIC_LINUX,
-    SLACKWARE,
-    GENTOO,
-    GENERIC_BSD,
-    FREEBSD,
-    NETBSD,
-    OPENBSD
-  };
+	class newHostDialog : public KDialogBase
+	{
+		Q_OBJECT
+		private:
+			QRadioButton *m_useIP;
+			QRadioButton *m_useMAC;
+			QRadioButton *m_allow;
+			QRadioButton *m_block;
+			KLineEdit *m_address;
+    public:
+    	newHostDialog(QString text, QWidget *parent);
+    	void show();
+    	struct Host getHost();
+	};
 }
 
 #endif
