@@ -22,46 +22,29 @@
 #define FORWARDINGPAGE_H
 
 #include <qframe.h>
-#include <qradiobutton.h>
 #include <qstring.h>
 #include <qvaluevector.h>
 
-#include <kdialogbase.h>
-#include <klineedit.h>
 #include <klistview.h>
 #include <kpushbutton.h>
 
+#include "newForwardDialog.h"
 #include "kiptg.h"
 
 namespace kiptg
 {
-	struct Forward
-	{
-		int direction; // contains kiptg::direction enum
-		QString from;
-		QString to;
-  };
 	class forwardingPage : public QFrame
 	{
 		Q_OBJECT
 		private:
-			void setupNewForwardDialog(QString text);
 			
 			KListView *m_forwards;
 			
-			KDialogBase *m_newForwardDialog;
-			
-			QRadioButton *m_forwardIncoming;
-			QRadioButton *m_forwardOutgoing;
-			
 			KPushButton *m_add;
 			KPushButton *m_del;
-			
-			KLineEdit *m_forwardPort;
-			KLineEdit *m_forwardTo;
+			newForwardDialog *m_newForwardDialog;
     private slots:
     	void slotSelectionChanged();
-    	void slotShowForwardDialog();
     	void slotAdd();
     	void slotDel();
     public:

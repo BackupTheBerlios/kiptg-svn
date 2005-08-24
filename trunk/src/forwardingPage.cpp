@@ -58,7 +58,8 @@ namespace kiptg
 	
 	forwardingPage::forwardingPage(QString text, QString newText, QWidget* parent) : QFrame(parent)
 	{
-		setupNewForwardDialog(newText);
+		m_newForwardDialog = new newForwardDialog(newText, this);
+		connect(m_newForwardDialog, SIGNAL(okClicked()), this, SLOT(slotAdd()));
 		
     QGridLayout *layout = new QGridLayout(this, 4, 2);
     layout->setSpacing(KDialogBase::spacingHint());
@@ -78,7 +79,7 @@ namespace kiptg
     m_add = new KPushButton(i18n("Add Port"), this);
     m_add->show();
     layout->addWidget(m_add, 1, 1);
-    connect(m_add, SIGNAL(clicked()), this, SLOT(slotShowForwardDialog()));
+    connect(m_add, SIGNAL(clicked()), m_newForwardDialog, SLOT(show()));
     
     m_del = new KPushButton(i18n("Remove Port"), this);
     m_del->show();
@@ -97,72 +98,17 @@ namespace kiptg
   
   void forwardingPage::slotAdd()
   {
+  	struct Forward forward = m_newForwardDialog->getForward();
     QString direction;
-    m_forwardIncoming->isChecked()
+    forward.direction == kiptg::INCOMING
       ? direction = i18n("Incoming")
       : direction = i18n("Outgoing");
   
     QListViewItem *item = new KListViewItem(m_forwards,
       direction,
-      m_forwardPort->text(),
-      m_forwardTo->text());
+      forward.from,
+      forward.to);
       item = 0; // stop unused variable warnings
   }
   
-	void forwardingPage::slotShowForwardDialog()
-  {
-    m_forwardPort->setText("");
-    m_forwardTo->setText("");
-    m_forwardIncoming->setChecked(true);
-
-    m_newForwardDialog->show();
-  }
-
-	void forwardingPage::setupNewForwardDialog(QString text)
-	{
-    m_newForwardDialog = new KDialogBase(this, 0, true, i18n("Add Forward"), KDialogBase::Ok | KDialogBase::Cancel);
-    
-    QFrame *dialogArea = new QFrame(m_newForwardDialog);
-    QGridLayout *layout = new QGridLayout(dialogArea, 4, 2);
-    layout->setSpacing(KDialogBase::spacingHint());
-    
-    KActiveLabel *intro = new KActiveLabel(text, dialogArea);
-    intro->show();
-    layout->addMultiCellWidget(intro, 0, 0, 0, 1);
-    
-    QButtonGroup *direction = new QButtonGroup(dialogArea);
-    direction->hide();
-    
-    m_forwardIncoming = new QRadioButton(i18n("&Incoming"), dialogArea);
-    m_forwardIncoming->setChecked(true);
-    m_forwardIncoming->show();
-    layout->addWidget(m_forwardIncoming, 1, 0);
-    direction->insert(m_forwardIncoming);
-    
-    m_forwardOutgoing = new QRadioButton(i18n("&Outgoing"), dialogArea);
-    m_forwardOutgoing->show();
-    layout->addWidget(m_forwardOutgoing, 1, 1);
-    direction->insert(m_forwardOutgoing);
-    
-    QLabel *label = new QLabel(i18n("Port:"), dialogArea);
-    label->show();
-    layout->addWidget(label, 2, 0);
-    
-    m_forwardPort = new KLineEdit(dialogArea);
-    m_forwardPort->show();
-    layout->addWidget(m_forwardPort, 2, 1);
-    
-    label = new QLabel(i18n("Destination:"), dialogArea);
-    label->show();
-    layout->addWidget(label, 3, 0);
-    
-    m_forwardTo = new KLineEdit(dialogArea);
-    m_forwardTo->show();
-    layout->addWidget(m_forwardTo, 3, 1);
-  
-    connect(m_newForwardDialog, SIGNAL(okClicked()), this, SLOT(slotAdd()));
-    
-    dialogArea->show();
-    m_newForwardDialog->setMainWidget(dialogArea);
-	}
 }

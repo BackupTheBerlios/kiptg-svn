@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 by Fred Emmott                                     *
+ *   Copyright (C) 2005 by Fred Emmott                                     *
  *   mail@fredemmott.co.uk                                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,55 +18,33 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef KIPTG_H
-#define KIPTG_H
+#ifndef NEWFORWARDDIALOG_H
+#define NEWFORWARDDIALOG_H
 
+#include <qradiobutton.h>
 #include <qstring.h>
 
-namespace kiptg 
+#include <kdialogbase.h>
+#include <klineedit.h>
+
+#include "kiptg.h"
+
+namespace kiptg
 {
-	struct Forward
+	class newForwardDialog : public KDialogBase
 	{
-		int direction; // contains kiptg::direction enum
-		QString from;
-		QString to;
-  };
-	struct Service
-	{
-		QString portNumber, protocol, action, portName;
-  };
-	struct Host
-	{
-		bool accept;
-		bool useIP;
-		QString address;
-  };
-	enum direction {
-		INCOMING,
-		OUTGOING
-  };
-	enum ctstate {
-		ESTABLISHED = 1,
-		RELATED = 2,
-		NEW = 4
-  };
-	enum policy {
-		ACCEPT,
-		DROP
-  };
-	enum os {
-		LINUX,
-		BSD
-  };
-	enum distros {
-    GENERIC_LINUX,
-    SLACKWARE,
-    GENTOO,
-    GENERIC_BSD,
-    FREEBSD,
-    NETBSD,
-    OPENBSD
-  };
+		Q_OBJECT
+		private:
+			QRadioButton *m_incoming;
+			QRadioButton *m_outgoing;
+			
+			KLineEdit *m_port;
+			KLineEdit *m_to;
+    public:
+    	newForwardDialog::newForwardDialog(QString text, QWidget *parent);
+    	struct Forward getForward();
+    	void show();
+	};
 }
 
 #endif
