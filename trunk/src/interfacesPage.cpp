@@ -46,9 +46,19 @@ namespace kiptg
     
     m_interfaces = new KListBox(this);
   
-    char buffer[IFNAMSIZ];
-    for(unsigned int i = 1; if_indextoname(i, buffer) != NULL; i++)
-      if ((QString)buffer != "lo") m_interfaces->insertItem((QString)buffer);
+    struct if_nameindex *interfaces = if_nameindex();
+    while (true)
+    {
+    	static int i = -1;
+    	if (interfaces[++i].if_index != 0)
+      {
+      	if ((QString) interfaces[i].if_name != "lo")
+      		m_interfaces->insertItem(interfaces[i].if_name);
+      }
+      else
+      	break;
+    }
+    if_freenameindex(interfaces);
     
     m_interfaces->setSelectionMode(QListBox::Multi);
     for (unsigned short i = 0; i < m_interfaces->count(); i++)

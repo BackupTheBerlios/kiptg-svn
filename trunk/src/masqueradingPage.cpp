@@ -54,7 +54,7 @@ namespace kiptg
 	
 	masqueradingPage::masqueradingPage(QWidget *parent) : QFrame(parent)
 	{
-		char ifBuffer[IFNAMSIZ];
+		struct if_nameindex *interfaces = if_nameindex();
 		
     QGridLayout *layout = new QGridLayout(this, 6,2);
     layout->setSpacing(KDialogBase::spacingHint());
@@ -85,8 +85,17 @@ namespace kiptg
     connect(m_no, SIGNAL(toggled(bool )), label, SLOT(setDisabled(bool )));
     
     m_extIf = new KComboBox(this);
-    for (unsigned int i = 1; if_indextoname(i, ifBuffer) != NULL; i++)
-      if ((QString)ifBuffer != "lo") m_extIf->insertItem((QString)ifBuffer);
+    while (true)
+    {
+    	static int i = -1;
+    	if (interfaces[++i].if_index != 0)
+      {
+      	if ((QString) interfaces[i].if_name != "lo")
+      		m_extIf->insertItem(interfaces[i].if_name);
+      }
+      else
+      	break;
+    }
     m_extIf->show();
     layout->addMultiCellWidget(m_extIf, 3, 3, 0, 1);
     connect(m_no, SIGNAL(toggled(bool )), m_extIf, SLOT(setDisabled(bool )));
@@ -98,14 +107,23 @@ namespace kiptg
     connect(m_no, SIGNAL(toggled(bool )), label, SLOT(setDisabled(bool )));
     
     m_intIfs = new KListBox(this);
-    for (unsigned int i = 1; if_indextoname(i, ifBuffer) != NULL; i++)
-      if((QString)ifBuffer != "lo") m_intIfs->insertItem((QString)ifBuffer);
+    while (true)
+    {
+    	static int i = -1;
+    	if (interfaces[++i].if_index != 0)
+      {
+      	if ((QString) interfaces[i].if_name != "lo")
+      		m_intIfs->insertItem(interfaces[i].if_name);
+      }
+      else
+      	break;
+    }
     m_intIfs->show();
     layout->addMultiCellWidget(m_intIfs, 5, 5, 0, 1);
     connect(m_no, SIGNAL(toggled(bool )), m_intIfs, SLOT(setDisabled(bool )));
     
     m_intIfs->setSelectionMode(QListBox::Multi);
-    
     m_no->setChecked(true);
+    if_freenameindex(interfaces);
 	};
 }

@@ -45,7 +45,7 @@ namespace kiptg
     m_distroList->insertItem(i18n("Generic Linux"), GENERIC_LINUX);
     m_distroList->insertItem(i18n("Slackware"), SLACKWARE);
     m_distroList->insertItem(i18n("Gentoo"), GENTOO);
-    m_distroList->insertItem(i18n("Generic BSD"), GENERIC_BSD); // FIXME: these are unimplemented
+    m_distroList->insertItem(i18n("Generic BSD"), GENERIC_BSD); // TODO: these are unimplemented
     m_distroList->insertItem(i18n("FreeBSD"), FREEBSD);
     m_distroList->insertItem(i18n("NetBSD"), NETBSD);
     m_distroList->insertItem(i18n("OpenBSD"), OPENBSD);
