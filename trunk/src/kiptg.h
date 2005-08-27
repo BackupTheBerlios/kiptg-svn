@@ -54,18 +54,10 @@ namespace kiptg
 		ACCEPT,
 		DROP
   };
-	enum os {
-		LINUX,
-		BSD
-  };
 	enum distros {
     GENERIC_LINUX,
     SLACKWARE,
-    GENTOO,
-    GENERIC_BSD,
-    FREEBSD,
-    NETBSD,
-    OPENBSD
+    GENTOO
   };
 }
 

@@ -45,17 +45,12 @@ namespace kiptg
     m_distroList->insertItem(i18n("Generic Linux"), GENERIC_LINUX);
     m_distroList->insertItem(i18n("Slackware"), SLACKWARE);
     m_distroList->insertItem(i18n("Gentoo"), GENTOO);
-    m_distroList->insertItem(i18n("Generic BSD"), GENERIC_BSD); // TODO: these are unimplemented
-    m_distroList->insertItem(i18n("FreeBSD"), FREEBSD);
-    m_distroList->insertItem(i18n("NetBSD"), NETBSD);
-    m_distroList->insertItem(i18n("OpenBSD"), OPENBSD);
     m_distroList->show();
     layout->addWidget(m_distroList);
     connect(m_distroList, SIGNAL(activated(int )), this, SIGNAL(distroChanged(int )));
     
     label = new QLabel(i18n(
-      "<p><i>Note: If your distribution isn't listed, the 'Generic Linux' or 'Generic BSD' "
-      "options should work for you.</i></p>"), this);
+      "<p><i>Note: If your distribution isn't listed, the 'Generic Linux' option should work for you.</i></p>"), this);
     label->show();
     layout->addWidget(label);
     

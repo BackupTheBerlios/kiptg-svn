@@ -47,9 +47,7 @@
 class kiptablesgenerator : public KWizard
 {
 Q_OBJECT
-private:
-  kiptg::os currentOS;
-  
+private: 
   kiptg::textPage *m_welcomePage;
   kiptg::distroPage *m_distroPage;
   kiptg::interfacesPage *m_interfacesPage;
@@ -73,7 +71,6 @@ private:
 	void linuxOutput(QString &rulesList, QString &undoList);
 protected slots:
   void slotShownRules();
-  void slotDistroChanged(int);
   virtual void accept();
 };
 

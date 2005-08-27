@@ -27,8 +27,6 @@ using namespace kiptg;
 kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
  : KWizard(parent, name)
 {
-	currentOS = LINUX;
-
 	m_welcomePage = new textPage(i18n(
 	  "<p>Welcome to KIptablesGenerator.</p>"
     "<p>This wizard will help you create your firewall rules.</p>"
@@ -41,7 +39,6 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
   m_distroPage = new distroPage(this);
   m_distroPage->show();
   this->addPage(m_distroPage, i18n("Distribution"));
-  connect(m_distroPage, SIGNAL(distroChanged(int )), this, SLOT(slotDistroChanged(int)));
   
   m_interfacesPage = new interfacesPage(this);
   m_interfacesPage->show();
@@ -107,25 +104,6 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
   helpButton()->hide();
 }
 
-void kiptablesgenerator::slotDistroChanged(int distro)
-{
-	switch (distro)
-	{
-		case GENERIC_LINUX:
-		case SLACKWARE:
-		case GENTOO:
-			if ( currentOS == LINUX )
-				return;
-      currentOS = LINUX;
-			break;
-    default: // BSD
-    	if ( currentOS == BSD )
-    		return;
-      currentOS = BSD;
-    	break;
-	}
-}
-
 void kiptablesgenerator::makeScript(QString &rulesList, QString &undoList, int distro)
 {
   QString output, copyrightText =
@@ -188,7 +166,7 @@ void kiptablesgenerator::accept()
 {
   QString rulesList, undoList;
 
-	if ( currentOS == LINUX ) linuxOutput(rulesList, undoList);
+	linuxOutput(rulesList, undoList);
  
   this->hide();
   makeScript(rulesList, undoList, m_distroPage->getDistro());
@@ -297,7 +275,9 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
     
     sections.append(rulesList);
     
-    rulesList = "##### Connection tracking rules #####\n";
+    rulesList = "##### Connection tracking rules #####\n"
+    	"/sbin/modprobe ip_conntrack_ftp\n"
+    	"/sbin/modprobe ip_conntrack_irc\n";
     
     if ( m_conntrackPage->allSame() )
     {
@@ -397,7 +377,10 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
       "$IPTABLES -t nat -F POSTROUTING\n"
       "$IPTABLES -t nat -A POSTROUTING -o $EXT_IF -j MASQUERADE\n"
       "# Enable IP packet forwarding\n"
-      "echo 1 > /proc/sys/net/ipv4/ip_forward\n").arg(m_masqueradingPage->extIf()).arg(m_masqueradingPage->intIfs().join(" ") );
+      "echo 1 > /proc/sys/net/ipv4/ip_forward\n"
+      "# Enable helper modules for IRC and FTP\n"
+      "/sbin/modprobe ip_nat_irc\n"
+      "/sbin/modprobe ip_nat_ftp\n").arg(m_masqueradingPage->extIf()).arg(m_masqueradingPage->intIfs().join(" "));
     undoList += QString(
     	"$IPTABLES -t nat -F POSTROUTING\n"
     	"echo 0 > /proc/sys/net/ipv4/ip_forward\n");
