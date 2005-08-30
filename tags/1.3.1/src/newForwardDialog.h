@@ -18,24 +18,33 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef POLICYPAGE_H
-#define POLICYPAGE_H
+#ifndef NEWFORWARDDIALOG_H
+#define NEWFORWARDDIALOG_H
 
-#include <qframe.h>
+#include <qradiobutton.h>
 #include <qstring.h>
 
-#include <kcombobox.h>
+#include <kdialogbase.h>
+#include <klineedit.h>
+
+#include "kiptg.h"
 
 namespace kiptg
 {
-	class policyPage : public QFrame
+	class newForwardDialog : public KDialogBase
 	{
-  Q_OBJECT
-  private:
-  	KComboBox* m_policy;
-  public:
-  	policyPage(QString text, QWidget* parent);
-  	int value();
-  };
+		Q_OBJECT
+		private:
+			QRadioButton *m_incoming;
+			QRadioButton *m_outgoing;
+			
+			KLineEdit *m_port;
+			KLineEdit *m_to;
+    public:
+    	newForwardDialog::newForwardDialog(QString text, QWidget *parent);
+    	struct Forward getForward();
+    	void show();
+	};
 }
+
 #endif

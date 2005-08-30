@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Fred Emmott                                     *
+ *   Copyright (C) 2004 by Fred Emmott                                     *
  *   mail@fredemmott.co.uk                                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,24 +18,46 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef POLICYPAGE_H
-#define POLICYPAGE_H
 
-#include <qframe.h>
-#include <qstring.h>
+#include "kiptablesgenerator.h"
+#include <kapplication.h>
+#include <kaboutdata.h>
+#include <kcmdlineargs.h>
+#include <klocale.h>
 
-#include <kcombobox.h>
+static const char description[] =
+    I18N_NOOP("A KDE IPTables Script Generator");
 
-namespace kiptg
+static const char version[] = "1.0";
+
+static KCmdLineOptions options[] =
 {
-	class policyPage : public QFrame
-	{
-  Q_OBJECT
-  private:
-  	KComboBox* m_policy;
-  public:
-  	policyPage(QString text, QWidget* parent);
-  	int value();
-  };
+//    { "+[URL]", I18N_NOOP( "Document to open" ), 0 },
+    KCmdLineLastOption
+};
+
+int main(int argc, char **argv)
+{
+    KAboutData about("KIptablesGenerator", I18N_NOOP("KIptablesGenerator"), version, description,
+		     KAboutData::License_GPL, "(C) %{YEAR} Fred Emmott", 0, 0, "mail@fredemmott.co.uk");
+    about.addAuthor( "Fred Emmott", 0, "mail@fredemmott.co.uk" );
+    KCmdLineArgs::init(argc, argv, &about);
+    KCmdLineArgs::addCmdLineOptions( options );
+    KApplication app;
+    kiptablesgenerator *mainWin = 0;
+
+    // no session.. just start up normally
+    KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
+
+    /// @todo do something with the command line args here
+
+    mainWin = new kiptablesgenerator();
+    app.setMainWidget( mainWin );
+    mainWin->show();
+
+    args->clear();
+
+    // mainWin has WDestructiveClose flag by default, so it will delete itself.
+    return app.exec();
 }
-#endif
+

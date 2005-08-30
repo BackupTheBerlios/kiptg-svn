@@ -18,24 +18,42 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef POLICYPAGE_H
-#define POLICYPAGE_H
+#ifndef HOSTSPAGE_H
+#define HOSTSPAGE_H
 
 #include <qframe.h>
 #include <qstring.h>
+#include <qvaluevector.h>
 
-#include <kcombobox.h>
+#include <kdialogbase.h>
+#include <klistview.h>
+#include <kpushbutton.h>
+
+#include "newHostDialog.h"
+#include "kiptg.h"
 
 namespace kiptg
 {
-	class policyPage : public QFrame
+	class hostsPage : public QFrame
 	{
-  Q_OBJECT
-  private:
-  	KComboBox* m_policy;
-  public:
-  	policyPage(QString text, QWidget* parent);
-  	int value();
-  };
+  	Q_OBJECT
+  	private:
+  		KListView *m_hosts;
+  		
+  		newHostDialog *m_newHostDialog;
+  		
+  		KPushButton *m_add;
+  		KPushButton *m_del;
+  		
+  	private slots:
+  		void slotShowHostDialog();
+  		void slotSelectionChanged();
+  		void slotAdd();
+  		void slotDel();
+    public:
+    	hostsPage(QString text, QString newHostText, QWidget *parent);
+    	QValueVector<struct Host> getHosts();
+	};
 }
+
 #endif

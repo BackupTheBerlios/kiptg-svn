@@ -17,25 +17,19 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#ifndef POLICYPAGE_H
-#define POLICYPAGE_H
-
+ 
+#ifndef TEXTPAGE_H
+#define TEXTPAGE_H
 #include <qframe.h>
 #include <qstring.h>
 
-#include <kcombobox.h>
-
 namespace kiptg
 {
-	class policyPage : public QFrame
+	class textPage : public QFrame
 	{
-  Q_OBJECT
-  private:
-  	KComboBox* m_policy;
-  public:
-  	policyPage(QString text, QWidget* parent);
-  	int value();
-  };
+		Q_OBJECT
+		public:
+			textPage(QString text, QWidget* parent);
+	};
 }
 #endif

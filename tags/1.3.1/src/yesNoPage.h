@@ -18,24 +18,24 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef POLICYPAGE_H
-#define POLICYPAGE_H
+#ifndef YESNOPAGE_H
+#define YESNOPAGE_H
 
 #include <qframe.h>
+#include <qradiobutton.h>
 #include <qstring.h>
-
-#include <kcombobox.h>
 
 namespace kiptg
 {
-	class policyPage : public QFrame
+	class yesNoPage : public QFrame
 	{
-  Q_OBJECT
-  private:
-  	KComboBox* m_policy;
-  public:
-  	policyPage(QString text, QWidget* parent);
-  	int value();
+  	Q_OBJECT
+  	private:
+  		QRadioButton* m_yes;
+  		QRadioButton* m_no;
+    public:
+    	yesNoPage(QString text, QWidget* parent);
+    	bool value();
   };
 }
 #endif

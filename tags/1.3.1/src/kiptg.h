@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Fred Emmott                                     *
+ *   Copyright (C) 2004 by Fred Emmott                                     *
  *   mail@fredemmott.co.uk                                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,24 +18,47 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef POLICYPAGE_H
-#define POLICYPAGE_H
+#ifndef KIPTG_H
+#define KIPTG_H
 
-#include <qframe.h>
 #include <qstring.h>
 
-#include <kcombobox.h>
-
-namespace kiptg
+namespace kiptg 
 {
-	class policyPage : public QFrame
+	struct Forward
 	{
-  Q_OBJECT
-  private:
-  	KComboBox* m_policy;
-  public:
-  	policyPage(QString text, QWidget* parent);
-  	int value();
+		int direction; // contains kiptg::direction enum
+		QString from;
+		QString to;
+  };
+	struct Service
+	{
+		QString portNumber, protocol, action, portName;
+  };
+	struct Host
+	{
+		bool accept;
+		bool useIP;
+		QString address;
+  };
+	enum direction {
+		INCOMING,
+		OUTGOING
+  };
+	enum ctstate {
+		ESTABLISHED = 1,
+		RELATED = 2,
+		NEW = 4
+  };
+	enum policy {
+		ACCEPT,
+		DROP
+  };
+	enum distros {
+    GENERIC_LINUX,
+    SLACKWARE,
+    GENTOO
   };
 }
+
 #endif

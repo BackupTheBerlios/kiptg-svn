@@ -18,24 +18,39 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef POLICYPAGE_H
-#define POLICYPAGE_H
+#include "policyPage.h"
 
-#include <qframe.h>
-#include <qstring.h>
+#include <qlabel.h>
+#include <qlayout.h>
 
-#include <kcombobox.h>
+#include <kdialogbase.h>
+#include <klocale.h>
+
+#include "kiptg.h"
 
 namespace kiptg
 {
-	class policyPage : public QFrame
+	policyPage::policyPage(QString text, QWidget* parent) : QFrame(parent)
 	{
-  Q_OBJECT
-  private:
-  	KComboBox* m_policy;
-  public:
-  	policyPage(QString text, QWidget* parent);
-  	int value();
-  };
+    QVBoxLayout *layout = new QVBoxLayout(this);
+    layout->setSpacing(KDialogBase::spacingHint());
+    
+    QLabel *intro = new QLabel(text, this);
+    intro->show();
+    layout->addWidget(intro);
+    
+    m_policy = new KComboBox(this);
+    m_policy->insertItem(i18n("Accept"), ACCEPT);
+    m_policy->insertItem(i18n("Drop"), DROP);
+    m_policy->setCurrentItem(1);
+    m_policy->show();
+    layout->addWidget(m_policy);
+    
+    layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Ignored, QSizePolicy::Ignored));
+	};
+	
+	int policyPage::value()
+	{
+		return m_policy->currentItem();
+	}
 }
-#endif

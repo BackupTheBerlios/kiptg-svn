@@ -18,24 +18,43 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef POLICYPAGE_H
-#define POLICYPAGE_H
+#include "yesNoPage.h"
 
-#include <qframe.h>
-#include <qstring.h>
+#include <qbuttongroup.h>
+#include <qlabel.h>
+#include <qlayout.h>
 
-#include <kcombobox.h>
+#include <kdialogbase.h>
+#include <klocale.h>
 
 namespace kiptg
 {
-	class policyPage : public QFrame
+	yesNoPage::yesNoPage(QString text, QWidget* parent) : QFrame(parent)
 	{
-  Q_OBJECT
-  private:
-  	KComboBox* m_policy;
-  public:
-  	policyPage(QString text, QWidget* parent);
-  	int value();
-  };
+    QGridLayout *layout = new QGridLayout(this, 2, 2);
+    layout->setSpacing(KDialogBase::spacingHint());
+    
+    QLabel *label = new QLabel(text, this);
+    label->show();
+    layout->addMultiCellWidget(label, 0, 0, 0, 1);
+    
+    QButtonGroup *optYesNo = new QButtonGroup(this);
+    optYesNo->hide();
+    
+    m_yes = new QRadioButton(i18n("&Yes"), this);
+    m_yes->setChecked(true);
+    m_yes->show();
+    layout->addWidget(m_yes, 1, 0);
+    optYesNo->insert(m_yes);
+    
+    m_no = new QRadioButton(i18n("N&o"), this);
+    m_no->show();
+    layout->addWidget(m_no, 1, 1);
+    optYesNo->insert(m_no);
+  }
+  
+  bool yesNoPage::value()
+  {
+  	return m_yes->isChecked();
+  }
 }
-#endif

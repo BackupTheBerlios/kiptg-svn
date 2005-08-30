@@ -18,24 +18,25 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef POLICYPAGE_H
-#define POLICYPAGE_H
+#ifndef DISTROPAGE_H
+#define DISTROPAGE_H
 
 #include <qframe.h>
-#include <qstring.h>
 
 #include <kcombobox.h>
 
 namespace kiptg
 {
-	class policyPage : public QFrame
+	class distroPage : public QFrame
 	{
-  Q_OBJECT
-  private:
-  	KComboBox* m_policy;
-  public:
-  	policyPage(QString text, QWidget* parent);
-  	int value();
-  };
+		Q_OBJECT
+		private:
+			KComboBox *m_distroList;
+		public:
+			distroPage(QWidget *parent);
+			int getDistro();
+    signals:
+    	void distroChanged(int newDistro);
+	};
 }
 #endif

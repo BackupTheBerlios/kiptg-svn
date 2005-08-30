@@ -18,24 +18,33 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef POLICYPAGE_H
-#define POLICYPAGE_H
+#ifndef CONNTRACKPAGE_H
+#define CONNTRACKPAGE_H
 
+#include <qcheckbox.h>
 #include <qframe.h>
-#include <qstring.h>
 
-#include <kcombobox.h>
+#include "kiptg.h"
 
-namespace kiptg
+namespace kiptg 
 {
-	class policyPage : public QFrame
+	class conntrackPage : public QFrame
 	{
   Q_OBJECT
   private:
-  	KComboBox* m_policy;
+  	QCheckBox *m_allSame;
+  	QCheckBox *m_allEST, *m_allREL, *m_allNEW;
+  	QCheckBox *m_tcpEST, *m_tcpREL, *m_tcpNEW;
+  	QCheckBox *m_udpEST, *m_udpREL, *m_udpNEW;
+  	QCheckBox *m_icmpEST, *m_icmpREL, *m_icmpNEW;
   public:
-  	policyPage(QString text, QWidget* parent);
-  	int value();
-  };
+  	conntrackPage::conntrackPage(QWidget *parent);
+  	bool allSame();
+  	int getAll(); // these return the kiptg::ctstate enum
+  	int getTCP();
+  	int getUDP();
+  	int getICMP();
+	};
 }
+
 #endif

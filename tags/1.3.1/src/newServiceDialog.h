@@ -18,24 +18,41 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef POLICYPAGE_H
-#define POLICYPAGE_H
+#ifndef NEWSERVICEDIALOG_H
+#define NEWSERVICEDIALOG_H
 
-#include <qframe.h>
-#include <qstring.h>
+#include <qradiobutton.h>
 
 #include <kcombobox.h>
+#include <kdialogbase.h>
+#include <klineedit.h>
+
+#include "kiptg.h"
 
 namespace kiptg
 {
-	class policyPage : public QFrame
+	class newServiceDialog : public KDialogBase
 	{
-  Q_OBJECT
-  private:
-  	KComboBox* m_policy;
-  public:
-  	policyPage(QString text, QWidget* parent);
-  	int value();
-  };
+		Q_OBJECT
+		private:
+			KComboBox *m_protocols;
+			
+			QRadioButton *m_named;
+			QRadioButton *m_numbered;
+			
+			KComboBox *m_name;
+			KLineEdit *m_number;
+			
+			QRadioButton *m_accept;
+			QRadioButton *m_drop;
+    public:
+    	newServiceDialog(QWidget *parent);
+    	struct Service getService();
+    	void show();
+    private slots:
+    	void slotChangedProtocol(int newProtocol);
+      void slotNamedChanged(bool);
+	};
 }
+
 #endif

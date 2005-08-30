@@ -18,24 +18,35 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef POLICYPAGE_H
-#define POLICYPAGE_H
+#ifndef DEFENSIVECHECKSPAGE_H
+#define DEFENSIVECHECKSPAGE_H
 
+#include <qcheckbox.h>
 #include <qframe.h>
-#include <qstring.h>
-
-#include <kcombobox.h>
 
 namespace kiptg
 {
-	class policyPage : public QFrame
+	class defensiveChecksPage : public QFrame
 	{
-  Q_OBJECT
-  private:
-  	KComboBox* m_policy;
-  public:
-  	policyPage(QString text, QWidget* parent);
-  	int value();
-  };
+  	Q_OBJECT
+  	private:
+  		QCheckBox *m_spoofed;
+  		QCheckBox *m_synFlood;
+  		QCheckBox *m_newSyn;
+  		QCheckBox *m_synFin;
+  		QCheckBox *m_echoBroadcasts;
+  		QCheckBox *m_ignoreRedirects;
+  		QCheckBox *m_sourceRouting;
+    public:
+    	defensiveChecksPage(QWidget *parent);
+    	bool blockSpoofed();
+    	bool blockSynFlood();
+    	bool checkNewSyn();
+    	bool blockSynFin();
+    	bool blockEchoBroadcasts();
+    	bool ignoreRedirects();
+    	bool blockSourceRouted();
+	};
 }
+
 #endif

@@ -18,24 +18,47 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef POLICYPAGE_H
-#define POLICYPAGE_H
+#include "distroPage.h"
 
-#include <qframe.h>
-#include <qstring.h>
+#include <qlabel.h>
+#include <qlayout.h>
 
-#include <kcombobox.h>
+#include <kdialogbase.h>
+#include <klocale.h>
+
+#include "kiptg.h"
 
 namespace kiptg
 {
-	class policyPage : public QFrame
+	distroPage::distroPage(QWidget *parent) : QFrame(parent)
 	{
-  Q_OBJECT
-  private:
-  	KComboBox* m_policy;
-  public:
-  	policyPage(QString text, QWidget* parent);
-  	int value();
-  };
+		QVBoxLayout *layout = new QVBoxLayout(this);
+  	layout->setSpacing(KDialogBase::spacingHint());
+  	
+  	QLabel *label = new QLabel(i18n(
+    	"<p>Please select which distribution you wish to use the "
+    	"produced script on:</p>"), this);
+    label->show();
+    layout->addWidget(label);
+		
+		m_distroList = new KComboBox(this);
+    m_distroList->insertItem(i18n("Generic Linux"), GENERIC_LINUX);
+    m_distroList->insertItem(i18n("Slackware"), SLACKWARE);
+    m_distroList->insertItem(i18n("Gentoo"), GENTOO);
+    m_distroList->show();
+    layout->addWidget(m_distroList);
+    connect(m_distroList, SIGNAL(activated(int )), this, SIGNAL(distroChanged(int )));
+    
+    label = new QLabel(i18n(
+      "<p><i>Note: If your distribution isn't listed, the 'Generic Linux' option should work for you.</i></p>"), this);
+    label->show();
+    layout->addWidget(label);
+    
+    layout->addItem(new QSpacerItem(0,0, QSizePolicy::Ignored, QSizePolicy::Ignored));
+	}
+	
+	int distroPage::getDistro()
+	{
+		return m_distroList->currentItem();
+  }
 }
-#endif

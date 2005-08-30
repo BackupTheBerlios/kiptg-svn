@@ -17,25 +17,28 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef RULESDIALOG_H
+#define RULESDIALOG_H
 
-#ifndef POLICYPAGE_H
-#define POLICYPAGE_H
+#include <kdialogbase.h>
+#include <kpushbutton.h>
+#include <ktextedit.h>
 
-#include <qframe.h>
-#include <qstring.h>
-
-#include <kcombobox.h>
-
-namespace kiptg
+/**
+@author Fred Emmott
+*/
+class RulesDialog : public KDialogBase
 {
-	class policyPage : public QFrame
-	{
-  Q_OBJECT
-  private:
-  	KComboBox* m_policy;
-  public:
-  	policyPage(QString text, QWidget* parent);
-  	int value();
-  };
-}
+Q_OBJECT
+private:
+  KTextEdit *mRules;
+public:
+  RulesDialog(QWidget *parent = 0, const char *name = 0, const QString *rules = 0);
+
+  ~RulesDialog();
+protected slots:
+  virtual void slotUser1();
+  virtual void slotUser2();
+};
+
 #endif
