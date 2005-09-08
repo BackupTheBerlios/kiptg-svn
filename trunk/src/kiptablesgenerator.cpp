@@ -193,7 +193,9 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
     sections.append(rulesList);
     
     rulesList = "##### Hosts whitelist #####\n";
-    
+
+		rulesList += "$IPTABLES -A INPUT -s lo -j ACCEPT\n";   
+ 
     QValueVector<struct Host> hosts = m_hostsPage->getHosts();
     for (unsigned int i = 0; i < hosts.count(); i++)
     {
