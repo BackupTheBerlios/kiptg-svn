@@ -107,12 +107,11 @@ kiptablesgenerator::kiptablesgenerator(QWidget *parent, const char *name)
 void kiptablesgenerator::makeScript(QString &rulesList, QString &undoList, int distro)
 {
   QString output, copyrightText =
-    "# Copyright (c) 2004-2005 Frederick Emmott\n"
+    "# Copyright (c) 2004-2006 Frederick Emmott\n"
     "# Produced by KIptablesGenerator, please see\n"
     "# http://fredemmott.co.uk/index.php?page=kitg\n"
     "# This script is under the terms of the GNU\n"
-    "# General Public License, Version 2, or at your\n"
-    "# option, any later version.\n";
+    "# General Public License, Version 2\n";
   
   switch (distro)
   {
@@ -123,20 +122,16 @@ void kiptablesgenerator::makeScript(QString &rulesList, QString &undoList, int d
       output = "#!/bin/sh\n" + copyrightText + "IPTABLES=/usr/sbin/iptables\n\n"
         "function start() {\n" + rulesList +
         "}\n"
-        "function stop() {\n" + undoList +
+        "function stop() {\n"
         "$IPTABLES -P INPUT ACCEPT\n"
         "$IPTABLES -P FORWARD ACCEPT\n"
         "$IPTABLES -P OUTPUT ACCEPT\n"
-        "$IPTABLES -F\n"
+        "$IPTABLES -F\n" + undoList +
         "}\n"
+				"stop;\n"
         "case $1 in\n"
         "\tstop)\n"
-        "\t\tstop;\n"
-        "\t\t;;\n"
-        "\trestart)\n"
-        "\t\tstop;\n"
-        "\t\tstart;\n"
-        "\t\t;;\n"
+        "\t\texit;\n"
         "\t*)\n"
         "\t\tstart;\n"
         "esac";
@@ -148,11 +143,11 @@ void kiptablesgenerator::makeScript(QString &rulesList, QString &undoList, int d
         "ebegin \"Starting firewall\"\n" + rulesList +
         "eend 0\n}\n\n"
         "stop() {\n"
-        "ebegin \"Stopping firewall\"\n" + undoList +
+        "ebegin \"Stopping firewall\"\n"
         "$IPTABLES -P INPUT ACCEPT\n"
         "$IPTABLES -P OUTPUT ACCEPT\n"
         "$IPTABLES -P FORWARD ACCEPT\n"
-        "$IPTABLES -F\n"
+        "$IPTABLES -F\n" + undoList +
         "eend 0\n"
         "}";
       break;
@@ -214,19 +209,35 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
     rulesList = "##### Assorted defensive checks #####\n";
  
     if (m_defensiveChecksPage->blockSpoofed())
-      rulesList += "$IPTABLES -A INPUT ! -i lo -d 127.0.0.0/8 -j DROP\n";
+		{
+			rulesList +=
+				"# Block anything that seems to be from a local address,\n"
+				"#  but isn't local\n"
+      	"$IPTABLES -A INPUT ! -i lo -d 127.0.0.0/8 -j DROP\n";
+		}
     if (m_defensiveChecksPage->blockSynFlood())
     {
-      rulesList += "$IPTABLES -N Flood-Scan\n";
-      rulesList += "$IPTABLES -A INPUT -p tcp -m tcp --syn -j Flood-Scan\n";
-      rulesList += "$IPTABLES -A Flood-Scan -m limit --limit 1/s --limit-burst 20 -j RETURN\n";
-      rulesList += "$IPTABLES -A Flood-Scan -j DROP\n";
-      undoList += "$IPTABLES -X Flood-Scan\n";
+      rulesList +=
+				"# Try and check for flooding - you might want to change the limit and\n"
+				"#  limit-burst parameters\n"
+				"$IPTABLES -N Flood-Scan\n"
+      	"$IPTABLES -A INPUT -p tcp -m tcp --syn -j Flood-Scan\n"
+      	"$IPTABLES -A Flood-Scan -m limit --limit 1/s --limit-burst 20 -j RETURN\n"
+      	"$IPTABLES -A Flood-Scan -j DROP\n"
+      	"$IPTABLES -X Flood-Scan 2>/dev/null\n"; // /dev/null incase it doesn't exist
     }
     if (m_defensiveChecksPage->checkNewSyn())
-      rulesList += "$IPTABLES -A INPUT -p tcp -m tcp ! --syn -m conntrack --ctstate NEW -j DROP\n";
+		{
+      rulesList +=
+				"# Check that new TCP packets have SYN set\n"
+				"$IPTABLES -A INPUT -p tcp -m tcp ! --syn -m conntrack --ctstate NEW -j DROP\n";
+		}
     if (m_defensiveChecksPage->blockSynFin())
-      rulesList += "$IPTABLES -A INPUT -p tcp -m tcp --tcp-flags SYN,FIN SYN,FIN -j DROP\n";
+		{
+      rulesList +=
+				"# Block anything with both SYN and FIN set\n"
+				"$IPTABLES -A INPUT -p tcp -m tcp --tcp-flags SYN,FIN SYN,FIN -j DROP\n";
+		}
       
   	sections.append(rulesList);
   	
@@ -234,7 +245,8 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
   	
   	if (m_defensiveChecksPage->blockSpoofed())
   	{
-    	rulesList += "# Help protect against spoofing\n"
+    	rulesList +=
+				"# Help protect against spoofing\n"
     		"for i in /proc/sys/net/ipv4/conf/*/rp_filter; do\n"
         "\techo 1 > $i;\n"
       	"done\n";
@@ -277,9 +289,7 @@ void kiptablesgenerator::linuxOutput(QString& rulesList, QString& undoList)
     
     sections.append(rulesList);
     
-    rulesList = "##### Connection tracking rules #####\n"
-    	"/sbin/modprobe ip_conntrack_ftp\n"
-    	"/sbin/modprobe ip_conntrack_irc\n";
+    rulesList = "##### Connection tracking rules #####\n";
     
     if ( m_conntrackPage->allSame() )
     {

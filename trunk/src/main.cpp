@@ -28,7 +28,7 @@
 static const char description[] =
     I18N_NOOP("A KDE IPTables Script Generator");
 
-static const char version[] = "1.0";
+static const char version[] = "1.3.2";
 
 static KCmdLineOptions options[] =
 {
@@ -39,7 +39,7 @@ static KCmdLineOptions options[] =
 int main(int argc, char **argv)
 {
     KAboutData about("KIptablesGenerator", I18N_NOOP("KIptablesGenerator"), version, description,
-		     KAboutData::License_GPL, "(C) %{YEAR} Fred Emmott", 0, 0, "mail@fredemmott.co.uk");
+		     KAboutData::License_GPL, "(c) 2004-2006 Fred Emmott", 0, 0, "mail@fredemmott.co.uk");
     about.addAuthor( "Fred Emmott", 0, "mail@fredemmott.co.uk" );
     KCmdLineArgs::init(argc, argv, &about);
     KCmdLineArgs::addCmdLineOptions( options );
